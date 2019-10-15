@@ -35,41 +35,50 @@ class AccountController {
     
     static let shared = AccountController()
     
-    private(set) var accessToken: String?
-    
-    private let defaults = UserDefaults.standard
+    @Defaults(key: Key.token) private(set) var accessToken: String?
     
     // ----------------------------------
     //  MARK: - Init -
     //
-    private init() {
-        self.loadToken()
-    }
+    private init() {}
     
     // ----------------------------------
     //  MARK: - Management -
     //
     func save(accessToken: String) {
         self.accessToken = accessToken
-        self.defaults.set(accessToken, forKey: Key.token)
-        self.defaults.synchronize()
     }
     
     func deleteAccessToken() {
         self.accessToken = nil
-        self.defaults.removeObject(forKey: Key.token)
-        self.defaults.synchronize()
-    }
-    
-    @discardableResult
-    func loadToken() -> String? {
-        self.accessToken = self.defaults.string(forKey: Key.token)
-        return self.accessToken
     }
 }
 
 private extension AccountController {
     enum Key {
         static let token = "com.shopify.storefront.customerAccessToken"
+    }
+}
+
+@propertyWrapper
+struct Defaults<Value> {
+    
+    var wrappedValue: Value? {
+        get {
+            UserDefaults.standard.value(forKey: self.key) as? Value
+        }
+        set {
+            if let value = newValue {
+                UserDefaults.standard.setValue(value, forKey: self.key)
+            } else {
+                UserDefaults.standard.removeObject(forKey: self.key)
+            }
+        }
+    }
+    
+    private let key: String
+    
+    init(key: String) {
+        self.key = key
     }
 }
