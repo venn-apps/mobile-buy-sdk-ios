@@ -27,6 +27,7 @@
 import Foundation
 import Buy
 import Pay
+import StorefrontAPI
 
 final class ClientQuery {
 
