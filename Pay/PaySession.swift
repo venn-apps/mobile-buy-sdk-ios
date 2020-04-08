@@ -85,7 +85,7 @@ public protocol PaySessionDelegate: class {
     /// - Important:
     /// If you previously set a partial address on checkout (eg: for obtaining shipping rates), you **MUST** update the checkout with the complete address provided by `authorization.shippingAddress`.
     ///
-    func paySession(_ paySession: PaySession, didAuthorizePayment authorization: PayAuthorization, checkout: PayCheckout, completeTransaction: @escaping (PaySession.TransactionStatus) -> Void)
+    func paySession(_ paySession: PaySession, didAuthorizePayment authorization: PayAuthorization, checkout: PayCheckout, completeTransaction: @escaping (PaySession.TransactionStatus, [PayCheckoutUserErrors]) -> Void)
 
     /// This callback is invoked when the Apple Pay authorization controller is dismissed.
     ///
@@ -234,12 +234,15 @@ extension PaySession: PKPaymentAuthorizationControllerDelegate {
         )
         
         Log("Authorized payment. Completing...")
-        self.delegate?.paySession(self, didAuthorizePayment: authorization, checkout: self.checkout, completeTransaction: { status in
+        self.delegate?.paySession(self, didAuthorizePayment: authorization, checkout: self.checkout, completeTransaction: { status, errors in
             Log("Completion status : \(status)")
-        
-            switch status {
-            case .success: completion(.success)
-            case .failure: completion(.failure)
+            if let error = errors.first {
+                completion(error.paymentAuthoirzationStatus)
+            } else {
+                switch status {
+                case .success: completion(.success)
+                case .failure: completion(.failure)
+                }
             }
         })
     }

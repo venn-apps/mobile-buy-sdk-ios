@@ -42,6 +42,7 @@
 		21751EFF243D136A005001D4 /* TokenizedPaymentInputV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21751EEC243D136A005001D4 /* TokenizedPaymentInputV3.swift */; };
 		21751F00243D136A005001D4 /* TokenizedPaymentInputV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21751EEC243D136A005001D4 /* TokenizedPaymentInputV3.swift */; };
 		21751F01243D136A005001D4 /* TokenizedPaymentInputV3.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21751EEC243D136A005001D4 /* TokenizedPaymentInputV3.swift */; };
+		52BDAB56243DC25D008BC963 /* PayCheckoutUserErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52BDAB55243DC25D008BC963 /* PayCheckoutUserErrors.swift */; };
 		8128551223C4AC7E00ADA66E /* Model3dSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128550323C4AC7D00ADA66E /* Model3dSource.swift */; };
 		8128551323C4AC7E00ADA66E /* Model3d.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128550423C4AC7D00ADA66E /* Model3d.swift */; };
 		8128551423C4AC7E00ADA66E /* UnitPriceMeasurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8128550523C4AC7E00ADA66E /* UnitPriceMeasurement.swift */; };
@@ -767,6 +768,7 @@
 		21751EEA243D1369005001D4 /* CustomerAccessTokenCreateWithMultipassPayload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomerAccessTokenCreateWithMultipassPayload.swift; sourceTree = "<group>"; };
 		21751EEB243D136A005001D4 /* PaymentTokenType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentTokenType.swift; sourceTree = "<group>"; };
 		21751EEC243D136A005001D4 /* TokenizedPaymentInputV3.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenizedPaymentInputV3.swift; sourceTree = "<group>"; };
+		52BDAB55243DC25D008BC963 /* PayCheckoutUserErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PayCheckoutUserErrors.swift; sourceTree = "<group>"; };
 		8128550323C4AC7D00ADA66E /* Model3dSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model3dSource.swift; sourceTree = "<group>"; };
 		8128550423C4AC7D00ADA66E /* Model3d.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Model3d.swift; sourceTree = "<group>"; };
 		8128550523C4AC7E00ADA66E /* UnitPriceMeasurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnitPriceMeasurement.swift; sourceTree = "<group>"; };
@@ -1310,6 +1312,7 @@
 				9A4068DE1E8E7659000254CD /* Pay.h */,
 				9A4068F51E8E767B000254CD /* PaySession.swift */,
 				9A4068F41E8E767B000254CD /* PayCheckout.swift */,
+				52BDAB55243DC25D008BC963 /* PayCheckoutUserErrors.swift */,
 				9A52D3B11F3CE99900C093C8 /* PayCardBrand.swift */,
 				9ABEB3D32123598800A373F2 /* PayGiftCard.swift */,
 				9A0C7FD01EA669C80020F187 /* PayDiscount.swift */,
@@ -1834,6 +1837,7 @@
 				9A4068FE1E8E767B000254CD /* PayShippingRate.swift in Sources */,
 				9AB421B11E93CA45005098C4 /* PayAuthorization.swift in Sources */,
 				9ABEB3D42123598800A373F2 /* PayGiftCard.swift in Sources */,
+				52BDAB56243DC25D008BC963 /* PayCheckoutUserErrors.swift in Sources */,
 				9A4068F91E8E767B000254CD /* PayAddress.swift in Sources */,
 				9A52D3B21F3CE99900C093C8 /* PayCardBrand.swift in Sources */,
 				9A4068FB1E8E767B000254CD /* PaySession.swift in Sources */,
