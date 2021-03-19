@@ -24,6 +24,8 @@
 //  THE SOFTWARE.
 //
 
+#if canImport(PassKit)
+
 import Foundation
 import PassKit
 
@@ -372,3 +374,5 @@ extension PaySession: PKPaymentAuthorizationControllerDelegate {
         self.delegate?.paySessionDidFinish(self)
     }
 }
+
+#endif

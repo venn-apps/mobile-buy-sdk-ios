@@ -1,8 +1,9 @@
 ﻿![Mobile Buy SDK](https://cloud.githubusercontent.com/assets/5244861/26374751/6895a582-3fd4-11e7-80c4-2c1632262d66.png)
 
-[![Travis](https://travis-ci.org/Shopify/mobile-buy-sdk-ios.svg?style=shield)](https://travis-ci.org/Shopify/mobile-buy-sdk-ios)
+[![Build](https://github.com/Shopify/mobile-buy-sdk-ios/workflows/Test/badge.svg?event=push)](https://github.com/Shopify/mobile-buy-sdk-ios/actions?query=workflow%3ATest)
 [![GitHub release](https://img.shields.io/github/release/shopify/mobile-buy-sdk-ios.svg?style=flat)](https://github.com/Shopify/mobile-buy-sdk-ios/releases/latest)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![Swift Package Manager compatible](https://img.shields.io/badge/Swift%20Package%20Manager-compatible-4BC51D.svg?style=flat)](https://swift.org/package-manager/)
 [![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/Shopify/mobile-buy-sdk-ios/blob/master/LICENSE)
 
 # Mobile Buy SDK
@@ -89,6 +90,10 @@ The documentation is generated using [Jazzy](https://github.com/realm/jazzy).
 ## Installation [⤴](#table-of-contents)
 
 <a href="https://github.com/Shopify/mobile-buy-sdk-ios/releases/latest">Download the latest version</a>
+
+### Swift Package Manager [⤴](#table-of-contents)
+
+This is the recommended approach of integration the SDK with your app. You can follow Apple's guide for [adding a package dependency to your app](https://developer.apple.com/documentation/xcode/adding_package_dependencies_to_your_app) for a thorough walkthrough. 
 
 ### Dynamic Framework Installation [⤴](#table-of-contents)
 
