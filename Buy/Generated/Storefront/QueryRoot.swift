@@ -32,6 +32,10 @@ extension Storefront {
 	open class QueryRootQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = QueryRoot
 
+		open override var description: String {
+			return "query " + super.description
+		}
+
 		/// List of the shop's articles. 
 		///
 		/// - parameters:
@@ -269,6 +273,7 @@ extension Storefront {
 			return self
 		}
 
+		/// Returns a specific node by ID. 
 		///
 		/// - parameters:
 		///     - id: The ID of the Node to return.
@@ -288,6 +293,7 @@ extension Storefront {
 			return self
 		}
 
+		/// Returns the list of nodes with the given IDs. 
 		///
 		/// - parameters:
 		///     - ids: The IDs of the Nodes to return.
@@ -760,6 +766,7 @@ extension Storefront {
 			return field(field: "customer", aliasSuffix: alias) as! Storefront.Customer?
 		}
 
+		/// Returns a specific node by ID. 
 		open var node: Node? {
 			return internalGetNode()
 		}
@@ -772,6 +779,7 @@ extension Storefront {
 			return field(field: "node", aliasSuffix: alias) as! Node?
 		}
 
+		/// Returns the list of nodes with the given IDs. 
 		open var nodes: [Node?] {
 			return internalGetNodes()
 		}
