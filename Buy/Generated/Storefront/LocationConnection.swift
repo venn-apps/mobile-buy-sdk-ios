@@ -1,5 +1,5 @@
 //
-//  ProductPriceRangeConnection.swift
+//  LocationConnection.swift
 //  Buy
 //
 //  Created by Shopify.
@@ -27,23 +27,33 @@
 import Foundation
 
 extension Storefront {
-	/// An auto-generated type for paginating through multiple ProductPriceRanges. 
-	open class ProductPriceRangeConnectionQuery: GraphQL.AbstractQuery, GraphQLQuery {
-		public typealias Response = ProductPriceRangeConnection
+	/// An auto-generated type for paginating through multiple Locations. 
+	open class LocationConnectionQuery: GraphQL.AbstractQuery, GraphQLQuery {
+		public typealias Response = LocationConnection
 
 		/// A list of edges. 
 		@discardableResult
-		open func edges(alias: String? = nil, _ subfields: (ProductPriceRangeEdgeQuery) -> Void) -> ProductPriceRangeConnectionQuery {
-			let subquery = ProductPriceRangeEdgeQuery()
+		open func edges(alias: String? = nil, _ subfields: (LocationEdgeQuery) -> Void) -> LocationConnectionQuery {
+			let subquery = LocationEdgeQuery()
 			subfields(subquery)
 
 			addField(field: "edges", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
+		/// A list of the nodes contained in LocationEdge. 
+		@discardableResult
+		open func nodes(alias: String? = nil, _ subfields: (LocationQuery) -> Void) -> LocationConnectionQuery {
+			let subquery = LocationQuery()
+			subfields(subquery)
+
+			addField(field: "nodes", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
 		/// Information to aid in pagination. 
 		@discardableResult
-		open func pageInfo(alias: String? = nil, _ subfields: (PageInfoQuery) -> Void) -> ProductPriceRangeConnectionQuery {
+		open func pageInfo(alias: String? = nil, _ subfields: (PageInfoQuery) -> Void) -> LocationConnectionQuery {
 			let subquery = PageInfoQuery()
 			subfields(subquery)
 
@@ -52,37 +62,52 @@ extension Storefront {
 		}
 	}
 
-	/// An auto-generated type for paginating through multiple ProductPriceRanges. 
-	open class ProductPriceRangeConnection: GraphQL.AbstractResponse, GraphQLObject {
-		public typealias Query = ProductPriceRangeConnectionQuery
+	/// An auto-generated type for paginating through multiple Locations. 
+	open class LocationConnection: GraphQL.AbstractResponse, GraphQLObject {
+		public typealias Query = LocationConnectionQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
 				case "edges":
 				guard let value = value as? [[String: Any]] else {
-					throw SchemaViolationError(type: ProductPriceRangeConnection.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: LocationConnection.self, field: fieldName, value: fieldValue)
 				}
-				return try value.map { return try ProductPriceRangeEdge(fields: $0) }
+				return try value.map { return try LocationEdge(fields: $0) }
+
+				case "nodes":
+				guard let value = value as? [[String: Any]] else {
+					throw SchemaViolationError(type: LocationConnection.self, field: fieldName, value: fieldValue)
+				}
+				return try value.map { return try Location(fields: $0) }
 
 				case "pageInfo":
 				guard let value = value as? [String: Any] else {
-					throw SchemaViolationError(type: ProductPriceRangeConnection.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: LocationConnection.self, field: fieldName, value: fieldValue)
 				}
 				return try PageInfo(fields: value)
 
 				default:
-				throw SchemaViolationError(type: ProductPriceRangeConnection.self, field: fieldName, value: fieldValue)
+				throw SchemaViolationError(type: LocationConnection.self, field: fieldName, value: fieldValue)
 			}
 		}
 
 		/// A list of edges. 
-		open var edges: [Storefront.ProductPriceRangeEdge] {
+		open var edges: [Storefront.LocationEdge] {
 			return internalGetEdges()
 		}
 
-		func internalGetEdges(alias: String? = nil) -> [Storefront.ProductPriceRangeEdge] {
-			return field(field: "edges", aliasSuffix: alias) as! [Storefront.ProductPriceRangeEdge]
+		func internalGetEdges(alias: String? = nil) -> [Storefront.LocationEdge] {
+			return field(field: "edges", aliasSuffix: alias) as! [Storefront.LocationEdge]
+		}
+
+		/// A list of the nodes contained in LocationEdge. 
+		open var nodes: [Storefront.Location] {
+			return internalGetNodes()
+		}
+
+		func internalGetNodes(alias: String? = nil) -> [Storefront.Location] {
+			return field(field: "nodes", aliasSuffix: alias) as! [Storefront.Location]
 		}
 
 		/// Information to aid in pagination. 
@@ -100,6 +125,12 @@ extension Storefront {
 				switch($0) {
 					case "edges":
 					internalGetEdges().forEach {
+						response.append($0)
+						response.append(contentsOf: $0.childResponseObjectMap())
+					}
+
+					case "nodes":
+					internalGetNodes().forEach {
 						response.append($0)
 						response.append(contentsOf: $0.childResponseObjectMap())
 					}

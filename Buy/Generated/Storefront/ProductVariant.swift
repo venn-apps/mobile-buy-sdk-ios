@@ -32,18 +32,17 @@ extension Storefront {
 	open class ProductVariantQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = ProductVariant
 
-		/// Indicates if the product variant is in stock. 
-		@available(*, deprecated, message:"Use `availableForSale` instead")
-		@discardableResult
-		open func available(alias: String? = nil) -> ProductVariantQuery {
-			addField(field: "available", aliasSuffix: alias)
-			return self
-		}
-
 		/// Indicates if the product variant is available for sale. 
 		@discardableResult
 		open func availableForSale(alias: String? = nil) -> ProductVariantQuery {
 			addField(field: "availableForSale", aliasSuffix: alias)
+			return self
+		}
+
+		/// The barcode (for example, ISBN, UPC, or GTIN) associated with the variant. 
+		@discardableResult
+		open func barcode(alias: String? = nil) -> ProductVariantQuery {
+			addField(field: "barcode", aliasSuffix: alias)
 			return self
 		}
 
@@ -75,7 +74,7 @@ extension Storefront {
 			return self
 		}
 
-		/// Globally unique identifier. 
+		/// A globally-unique identifier. 
 		@discardableResult
 		open func id(alias: String? = nil) -> ProductVariantQuery {
 			addField(field: "id", aliasSuffix: alias)
@@ -84,43 +83,16 @@ extension Storefront {
 
 		/// Image associated with the product variant. This field falls back to the 
 		/// product image if no image is available. 
-		///
-		/// - parameters:
-		///     - maxWidth: Image width in pixels between 1 and 2048. This argument is deprecated: Use `maxWidth` on `Image.transformedSrc` instead.
-		///     - maxHeight: Image height in pixels between 1 and 2048. This argument is deprecated: Use `maxHeight` on `Image.transformedSrc` instead.
-		///     - crop: Crops the image according to the specified region. This argument is deprecated: Use `crop` on `Image.transformedSrc` instead.
-		///     - scale: Image size multiplier for high-resolution retina displays. Must be between 1 and 3. This argument is deprecated: Use `scale` on `Image.transformedSrc` instead.
-		///
 		@discardableResult
-		open func image(alias: String? = nil, maxWidth: Int32? = nil, maxHeight: Int32? = nil, crop: CropRegion? = nil, scale: Int32? = nil, _ subfields: (ImageQuery) -> Void) -> ProductVariantQuery {
-			var args: [String] = []
-
-			if let maxWidth = maxWidth {
-				args.append("maxWidth:\(maxWidth)")
-			}
-
-			if let maxHeight = maxHeight {
-				args.append("maxHeight:\(maxHeight)")
-			}
-
-			if let crop = crop {
-				args.append("crop:\(crop.rawValue)")
-			}
-
-			if let scale = scale {
-				args.append("scale:\(scale)")
-			}
-
-			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
-
+		open func image(alias: String? = nil, _ subfields: (ImageQuery) -> Void) -> ProductVariantQuery {
 			let subquery = ImageQuery()
 			subfields(subquery)
 
-			addField(field: "image", aliasSuffix: alias, args: argsString, subfields: subquery)
+			addField(field: "image", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
-		/// The metafield associated with the resource. 
+		/// Returns a metafield found by namespace and key. 
 		///
 		/// - parameters:
 		///     - namespace: Container for a set of metafields (maximum of 20 characters).
@@ -153,6 +125,7 @@ extension Storefront {
 		///     - before: Returns the elements that come before the specified cursor.
 		///     - reverse: Reverse the order of the underlying list.
 		///
+		@available(*, deprecated, message:"The `metafields` field will be removed in the future in favor of using [aliases](https://graphql.org/learn/queries/#aliases) with the `metafield` field.\n")
 		@discardableResult
 		open func metafields(alias: String? = nil, namespace: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (MetafieldConnectionQuery) -> Void) -> ProductVariantQuery {
 			var args: [String] = []
@@ -187,101 +160,6 @@ extension Storefront {
 			subfields(subquery)
 
 			addField(field: "metafields", aliasSuffix: alias, args: argsString, subfields: subquery)
-			return self
-		}
-
-		/// List of prices and compare-at prices in the presentment currencies for this 
-		/// shop. 
-		///
-		/// - parameters:
-		///     - presentmentCurrencies: The presentment currencies prices should return in.
-		///     - first: Returns up to the first `n` elements from the list.
-		///     - after: Returns the elements that come after the specified cursor.
-		///     - last: Returns up to the last `n` elements from the list.
-		///     - before: Returns the elements that come before the specified cursor.
-		///     - reverse: Reverse the order of the underlying list.
-		///
-		@discardableResult
-		open func presentmentPrices(alias: String? = nil, presentmentCurrencies: [CurrencyCode]? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (ProductVariantPricePairConnectionQuery) -> Void) -> ProductVariantQuery {
-			var args: [String] = []
-
-			if let presentmentCurrencies = presentmentCurrencies {
-				args.append("presentmentCurrencies:[\(presentmentCurrencies.map{ "\($0.rawValue)" }.joined(separator: ","))]")
-			}
-
-			if let first = first {
-				args.append("first:\(first)")
-			}
-
-			if let after = after {
-				args.append("after:\(GraphQL.quoteString(input: after))")
-			}
-
-			if let last = last {
-				args.append("last:\(last)")
-			}
-
-			if let before = before {
-				args.append("before:\(GraphQL.quoteString(input: before))")
-			}
-
-			if let reverse = reverse {
-				args.append("reverse:\(reverse)")
-			}
-
-			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
-
-			let subquery = ProductVariantPricePairConnectionQuery()
-			subfields(subquery)
-
-			addField(field: "presentmentPrices", aliasSuffix: alias, args: argsString, subfields: subquery)
-			return self
-		}
-
-		/// List of unit prices in the presentment currencies for this shop. 
-		///
-		/// - parameters:
-		///     - presentmentCurrencies: Specify the currencies in which to return presentment unit prices.
-		///     - first: Returns up to the first `n` elements from the list.
-		///     - after: Returns the elements that come after the specified cursor.
-		///     - last: Returns up to the last `n` elements from the list.
-		///     - before: Returns the elements that come before the specified cursor.
-		///     - reverse: Reverse the order of the underlying list.
-		///
-		@discardableResult
-		open func presentmentUnitPrices(alias: String? = nil, presentmentCurrencies: [CurrencyCode]? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (MoneyV2ConnectionQuery) -> Void) -> ProductVariantQuery {
-			var args: [String] = []
-
-			if let presentmentCurrencies = presentmentCurrencies {
-				args.append("presentmentCurrencies:[\(presentmentCurrencies.map{ "\($0.rawValue)" }.joined(separator: ","))]")
-			}
-
-			if let first = first {
-				args.append("first:\(first)")
-			}
-
-			if let after = after {
-				args.append("after:\(GraphQL.quoteString(input: after))")
-			}
-
-			if let last = last {
-				args.append("last:\(last)")
-			}
-
-			if let before = before {
-				args.append("before:\(GraphQL.quoteString(input: before))")
-			}
-
-			if let reverse = reverse {
-				args.append("reverse:\(reverse)")
-			}
-
-			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
-
-			let subquery = MoneyV2ConnectionQuery()
-			subfields(subquery)
-
-			addField(field: "presentmentUnitPrices", aliasSuffix: alias, args: argsString, subfields: subquery)
 			return self
 		}
 
@@ -338,10 +216,96 @@ extension Storefront {
 			return self
 		}
 
+		/// Represents an association between a variant and a selling plan. Selling 
+		/// plan allocations describe which selling plans are available for each 
+		/// variant, and what their impact is on pricing. 
+		///
+		/// - parameters:
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///     - reverse: Reverse the order of the underlying list.
+		///
+		@discardableResult
+		open func sellingPlanAllocations(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (SellingPlanAllocationConnectionQuery) -> Void) -> ProductVariantQuery {
+			var args: [String] = []
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			if let reverse = reverse {
+				args.append("reverse:\(reverse)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = SellingPlanAllocationConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "sellingPlanAllocations", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
 		/// The SKU (stock keeping unit) associated with the variant. 
 		@discardableResult
 		open func sku(alias: String? = nil) -> ProductVariantQuery {
 			addField(field: "sku", aliasSuffix: alias)
+			return self
+		}
+
+		/// The in-store pickup availability of this variant by location. 
+		///
+		/// - parameters:
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///     - reverse: Reverse the order of the underlying list.
+		///
+		@discardableResult
+		open func storeAvailability(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (StoreAvailabilityConnectionQuery) -> Void) -> ProductVariantQuery {
+			var args: [String] = []
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			if let reverse = reverse {
+				args.append("reverse:\(reverse)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = StoreAvailabilityConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "storeAvailability", aliasSuffix: alias, args: argsString, subfields: subquery)
 			return self
 		}
 
@@ -390,21 +354,21 @@ extension Storefront {
 
 	/// A product variant represents a different version of a product, such as 
 	/// differing sizes or differing colors. 
-	open class ProductVariant: GraphQL.AbstractResponse, GraphQLObject, HasMetafields, MetafieldParentResource, Node {
+	open class ProductVariant: GraphQL.AbstractResponse, GraphQLObject, HasMetafields, Merchandise, MetafieldParentResource, MetafieldReference, Node {
 		public typealias Query = ProductVariantQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
-				case "available":
-				if value is NSNull { return nil }
+				case "availableForSale":
 				guard let value = value as? Bool else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
 				return value
 
-				case "availableForSale":
-				guard let value = value as? Bool else {
+				case "barcode":
+				if value is NSNull { return nil }
+				guard let value = value as? String else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
 				return value
@@ -455,18 +419,6 @@ extension Storefront {
 				}
 				return try MetafieldConnection(fields: value)
 
-				case "presentmentPrices":
-				guard let value = value as? [String: Any] else {
-					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
-				}
-				return try ProductVariantPricePairConnection(fields: value)
-
-				case "presentmentUnitPrices":
-				guard let value = value as? [String: Any] else {
-					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
-				}
-				return try MoneyV2Connection(fields: value)
-
 				case "price":
 				guard let value = value as? String else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
@@ -504,12 +456,24 @@ extension Storefront {
 				}
 				return try value.map { return try SelectedOption(fields: $0) }
 
+				case "sellingPlanAllocations":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try SellingPlanAllocationConnection(fields: value)
+
 				case "sku":
 				if value is NSNull { return nil }
 				guard let value = value as? String else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
 				return value
+
+				case "storeAvailability":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try StoreAvailabilityConnection(fields: value)
 
 				case "title":
 				guard let value = value as? String else {
@@ -549,16 +513,6 @@ extension Storefront {
 			}
 		}
 
-		/// Indicates if the product variant is in stock. 
-		@available(*, deprecated, message:"Use `availableForSale` instead")
-		open var available: Bool? {
-			return internalGetAvailable()
-		}
-
-		func internalGetAvailable(alias: String? = nil) -> Bool? {
-			return field(field: "available", aliasSuffix: alias) as! Bool?
-		}
-
 		/// Indicates if the product variant is available for sale. 
 		open var availableForSale: Bool {
 			return internalGetAvailableForSale()
@@ -566,6 +520,15 @@ extension Storefront {
 
 		func internalGetAvailableForSale(alias: String? = nil) -> Bool {
 			return field(field: "availableForSale", aliasSuffix: alias) as! Bool
+		}
+
+		/// The barcode (for example, ISBN, UPC, or GTIN) associated with the variant. 
+		open var barcode: String? {
+			return internalGetBarcode()
+		}
+
+		func internalGetBarcode(alias: String? = nil) -> String? {
+			return field(field: "barcode", aliasSuffix: alias) as! String?
 		}
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
@@ -599,7 +562,7 @@ extension Storefront {
 			return field(field: "currentlyNotInStock", aliasSuffix: alias) as! Bool
 		}
 
-		/// Globally unique identifier. 
+		/// A globally-unique identifier. 
 		open var id: GraphQL.ID {
 			return internalGetId()
 		}
@@ -614,15 +577,11 @@ extension Storefront {
 			return internalGetImage()
 		}
 
-		open func aliasedImage(alias: String) -> Storefront.Image? {
-			return internalGetImage(alias: alias)
-		}
-
 		func internalGetImage(alias: String? = nil) -> Storefront.Image? {
 			return field(field: "image", aliasSuffix: alias) as! Storefront.Image?
 		}
 
-		/// The metafield associated with the resource. 
+		/// Returns a metafield found by namespace and key. 
 		open var metafield: Storefront.Metafield? {
 			return internalGetMetafield()
 		}
@@ -636,9 +595,12 @@ extension Storefront {
 		}
 
 		/// A paginated list of metafields associated with the resource. 
+		@available(*, deprecated, message:"The `metafields` field will be removed in the future in favor of using [aliases](https://graphql.org/learn/queries/#aliases) with the `metafield` field.\n")
 		open var metafields: Storefront.MetafieldConnection {
 			return internalGetMetafields()
 		}
+
+		@available(*, deprecated, message:"The `metafields` field will be removed in the future in favor of using [aliases](https://graphql.org/learn/queries/#aliases) with the `metafield` field.\n")
 
 		open func aliasedMetafields(alias: String) -> Storefront.MetafieldConnection {
 			return internalGetMetafields(alias: alias)
@@ -646,33 +608,6 @@ extension Storefront {
 
 		func internalGetMetafields(alias: String? = nil) -> Storefront.MetafieldConnection {
 			return field(field: "metafields", aliasSuffix: alias) as! Storefront.MetafieldConnection
-		}
-
-		/// List of prices and compare-at prices in the presentment currencies for this 
-		/// shop. 
-		open var presentmentPrices: Storefront.ProductVariantPricePairConnection {
-			return internalGetPresentmentPrices()
-		}
-
-		open func aliasedPresentmentPrices(alias: String) -> Storefront.ProductVariantPricePairConnection {
-			return internalGetPresentmentPrices(alias: alias)
-		}
-
-		func internalGetPresentmentPrices(alias: String? = nil) -> Storefront.ProductVariantPricePairConnection {
-			return field(field: "presentmentPrices", aliasSuffix: alias) as! Storefront.ProductVariantPricePairConnection
-		}
-
-		/// List of unit prices in the presentment currencies for this shop. 
-		open var presentmentUnitPrices: Storefront.MoneyV2Connection {
-			return internalGetPresentmentUnitPrices()
-		}
-
-		open func aliasedPresentmentUnitPrices(alias: String) -> Storefront.MoneyV2Connection {
-			return internalGetPresentmentUnitPrices(alias: alias)
-		}
-
-		func internalGetPresentmentUnitPrices(alias: String? = nil) -> Storefront.MoneyV2Connection {
-			return field(field: "presentmentUnitPrices", aliasSuffix: alias) as! Storefront.MoneyV2Connection
 		}
 
 		/// The product variant’s price. 
@@ -731,6 +666,21 @@ extension Storefront {
 			return field(field: "selectedOptions", aliasSuffix: alias) as! [Storefront.SelectedOption]
 		}
 
+		/// Represents an association between a variant and a selling plan. Selling 
+		/// plan allocations describe which selling plans are available for each 
+		/// variant, and what their impact is on pricing. 
+		open var sellingPlanAllocations: Storefront.SellingPlanAllocationConnection {
+			return internalGetSellingPlanAllocations()
+		}
+
+		open func aliasedSellingPlanAllocations(alias: String) -> Storefront.SellingPlanAllocationConnection {
+			return internalGetSellingPlanAllocations(alias: alias)
+		}
+
+		func internalGetSellingPlanAllocations(alias: String? = nil) -> Storefront.SellingPlanAllocationConnection {
+			return field(field: "sellingPlanAllocations", aliasSuffix: alias) as! Storefront.SellingPlanAllocationConnection
+		}
+
 		/// The SKU (stock keeping unit) associated with the variant. 
 		open var sku: String? {
 			return internalGetSku()
@@ -738,6 +688,19 @@ extension Storefront {
 
 		func internalGetSku(alias: String? = nil) -> String? {
 			return field(field: "sku", aliasSuffix: alias) as! String?
+		}
+
+		/// The in-store pickup availability of this variant by location. 
+		open var storeAvailability: Storefront.StoreAvailabilityConnection {
+			return internalGetStoreAvailability()
+		}
+
+		open func aliasedStoreAvailability(alias: String) -> Storefront.StoreAvailabilityConnection {
+			return internalGetStoreAvailability(alias: alias)
+		}
+
+		func internalGetStoreAvailability(alias: String? = nil) -> Storefront.StoreAvailabilityConnection {
+			return field(field: "storeAvailability", aliasSuffix: alias) as! Storefront.StoreAvailabilityConnection
 		}
 
 		/// The product variant’s title. 
@@ -812,14 +775,6 @@ extension Storefront {
 					response.append(internalGetMetafields())
 					response.append(contentsOf: internalGetMetafields().childResponseObjectMap())
 
-					case "presentmentPrices":
-					response.append(internalGetPresentmentPrices())
-					response.append(contentsOf: internalGetPresentmentPrices().childResponseObjectMap())
-
-					case "presentmentUnitPrices":
-					response.append(internalGetPresentmentUnitPrices())
-					response.append(contentsOf: internalGetPresentmentUnitPrices().childResponseObjectMap())
-
 					case "priceV2":
 					response.append(internalGetPriceV2())
 					response.append(contentsOf: internalGetPriceV2().childResponseObjectMap())
@@ -833,6 +788,14 @@ extension Storefront {
 						response.append($0)
 						response.append(contentsOf: $0.childResponseObjectMap())
 					}
+
+					case "sellingPlanAllocations":
+					response.append(internalGetSellingPlanAllocations())
+					response.append(contentsOf: internalGetSellingPlanAllocations().childResponseObjectMap())
+
+					case "storeAvailability":
+					response.append(internalGetStoreAvailability())
+					response.append(contentsOf: internalGetStoreAvailability().childResponseObjectMap())
 
 					case "unitPrice":
 					if let value = internalGetUnitPrice() {

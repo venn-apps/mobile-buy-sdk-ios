@@ -1,5 +1,5 @@
 //
-//  ProductVariantPricePairConnection.swift
+//  SellingPlanConnection.swift
 //  Buy
 //
 //  Created by Shopify.
@@ -27,24 +27,33 @@
 import Foundation
 
 extension Storefront {
-	/// An auto-generated type for paginating through multiple 
-	/// ProductVariantPricePairs. 
-	open class ProductVariantPricePairConnectionQuery: GraphQL.AbstractQuery, GraphQLQuery {
-		public typealias Response = ProductVariantPricePairConnection
+	/// An auto-generated type for paginating through multiple SellingPlans. 
+	open class SellingPlanConnectionQuery: GraphQL.AbstractQuery, GraphQLQuery {
+		public typealias Response = SellingPlanConnection
 
 		/// A list of edges. 
 		@discardableResult
-		open func edges(alias: String? = nil, _ subfields: (ProductVariantPricePairEdgeQuery) -> Void) -> ProductVariantPricePairConnectionQuery {
-			let subquery = ProductVariantPricePairEdgeQuery()
+		open func edges(alias: String? = nil, _ subfields: (SellingPlanEdgeQuery) -> Void) -> SellingPlanConnectionQuery {
+			let subquery = SellingPlanEdgeQuery()
 			subfields(subquery)
 
 			addField(field: "edges", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
+		/// A list of the nodes contained in SellingPlanEdge. 
+		@discardableResult
+		open func nodes(alias: String? = nil, _ subfields: (SellingPlanQuery) -> Void) -> SellingPlanConnectionQuery {
+			let subquery = SellingPlanQuery()
+			subfields(subquery)
+
+			addField(field: "nodes", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
 		/// Information to aid in pagination. 
 		@discardableResult
-		open func pageInfo(alias: String? = nil, _ subfields: (PageInfoQuery) -> Void) -> ProductVariantPricePairConnectionQuery {
+		open func pageInfo(alias: String? = nil, _ subfields: (PageInfoQuery) -> Void) -> SellingPlanConnectionQuery {
 			let subquery = PageInfoQuery()
 			subfields(subquery)
 
@@ -53,38 +62,52 @@ extension Storefront {
 		}
 	}
 
-	/// An auto-generated type for paginating through multiple 
-	/// ProductVariantPricePairs. 
-	open class ProductVariantPricePairConnection: GraphQL.AbstractResponse, GraphQLObject {
-		public typealias Query = ProductVariantPricePairConnectionQuery
+	/// An auto-generated type for paginating through multiple SellingPlans. 
+	open class SellingPlanConnection: GraphQL.AbstractResponse, GraphQLObject {
+		public typealias Query = SellingPlanConnectionQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
 				case "edges":
 				guard let value = value as? [[String: Any]] else {
-					throw SchemaViolationError(type: ProductVariantPricePairConnection.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: SellingPlanConnection.self, field: fieldName, value: fieldValue)
 				}
-				return try value.map { return try ProductVariantPricePairEdge(fields: $0) }
+				return try value.map { return try SellingPlanEdge(fields: $0) }
+
+				case "nodes":
+				guard let value = value as? [[String: Any]] else {
+					throw SchemaViolationError(type: SellingPlanConnection.self, field: fieldName, value: fieldValue)
+				}
+				return try value.map { return try SellingPlan(fields: $0) }
 
 				case "pageInfo":
 				guard let value = value as? [String: Any] else {
-					throw SchemaViolationError(type: ProductVariantPricePairConnection.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: SellingPlanConnection.self, field: fieldName, value: fieldValue)
 				}
 				return try PageInfo(fields: value)
 
 				default:
-				throw SchemaViolationError(type: ProductVariantPricePairConnection.self, field: fieldName, value: fieldValue)
+				throw SchemaViolationError(type: SellingPlanConnection.self, field: fieldName, value: fieldValue)
 			}
 		}
 
 		/// A list of edges. 
-		open var edges: [Storefront.ProductVariantPricePairEdge] {
+		open var edges: [Storefront.SellingPlanEdge] {
 			return internalGetEdges()
 		}
 
-		func internalGetEdges(alias: String? = nil) -> [Storefront.ProductVariantPricePairEdge] {
-			return field(field: "edges", aliasSuffix: alias) as! [Storefront.ProductVariantPricePairEdge]
+		func internalGetEdges(alias: String? = nil) -> [Storefront.SellingPlanEdge] {
+			return field(field: "edges", aliasSuffix: alias) as! [Storefront.SellingPlanEdge]
+		}
+
+		/// A list of the nodes contained in SellingPlanEdge. 
+		open var nodes: [Storefront.SellingPlan] {
+			return internalGetNodes()
+		}
+
+		func internalGetNodes(alias: String? = nil) -> [Storefront.SellingPlan] {
+			return field(field: "nodes", aliasSuffix: alias) as! [Storefront.SellingPlan]
 		}
 
 		/// Information to aid in pagination. 
@@ -102,6 +125,12 @@ extension Storefront {
 				switch($0) {
 					case "edges":
 					internalGetEdges().forEach {
+						response.append($0)
+						response.append(contentsOf: $0.childResponseObjectMap())
+					}
+
+					case "nodes":
+					internalGetNodes().forEach {
 						response.append($0)
 						response.append(contentsOf: $0.childResponseObjectMap())
 					}

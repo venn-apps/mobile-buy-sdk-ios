@@ -1,5 +1,5 @@
 //
-//  OrderDisplayFinancialStatus.swift
+//  LocationSortKeys.swift
 //  Buy
 //
 //  Created by Shopify.
@@ -27,20 +27,19 @@
 import Foundation
 
 extension Storefront {
-	public enum OrderDisplayFinancialStatus: String {
-		case authorized = "AUTHORIZED"
+	/// The set of valid sort keys for the Location query. 
+	public enum LocationSortKeys: String {
+		/// Sort by the `city` value. 
+		case city = "CITY"
 
-		case paid = "PAID"
+		/// Sort by the `distance` value. 
+		case distance = "DISTANCE"
 
-		case partiallyPaid = "PARTIALLY_PAID"
+		/// Sort by the `id` value. 
+		case id = "ID"
 
-		case partiallyRefunded = "PARTIALLY_REFUNDED"
-
-		case pending = "PENDING"
-
-		case refunded = "REFUNDED"
-
-		case voided = "VOIDED"
+		/// Sort by the `name` value. 
+		case name = "NAME"
 
 		case unknownValue = ""
 	}
