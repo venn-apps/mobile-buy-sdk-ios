@@ -1,5 +1,5 @@
 //
-//  MoneyV2Edge.swift
+//  SellingPlanFixedPriceAdjustment.swift
 //  Buy
 //
 //  Created by Shopify.
@@ -27,79 +27,57 @@
 import Foundation
 
 extension Storefront {
-	/// An auto-generated type which holds one MoneyV2 and a cursor during 
-	/// pagination. 
-	open class MoneyV2EdgeQuery: GraphQL.AbstractQuery, GraphQLQuery {
-		public typealias Response = MoneyV2Edge
+	/// A fixed price adjustment for a variant that's purchased with a selling 
+	/// plan. 
+	open class SellingPlanFixedPriceAdjustmentQuery: GraphQL.AbstractQuery, GraphQLQuery {
+		public typealias Response = SellingPlanFixedPriceAdjustment
 
-		/// A cursor for use in pagination. 
+		/// A new price of the variant when it's purchased with the selling plan. 
 		@discardableResult
-		open func cursor(alias: String? = nil) -> MoneyV2EdgeQuery {
-			addField(field: "cursor", aliasSuffix: alias)
-			return self
-		}
-
-		/// The item at the end of MoneyV2Edge. 
-		@discardableResult
-		open func node(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> MoneyV2EdgeQuery {
+		open func price(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> SellingPlanFixedPriceAdjustmentQuery {
 			let subquery = MoneyV2Query()
 			subfields(subquery)
 
-			addField(field: "node", aliasSuffix: alias, subfields: subquery)
+			addField(field: "price", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 	}
 
-	/// An auto-generated type which holds one MoneyV2 and a cursor during 
-	/// pagination. 
-	open class MoneyV2Edge: GraphQL.AbstractResponse, GraphQLObject {
-		public typealias Query = MoneyV2EdgeQuery
+	/// A fixed price adjustment for a variant that's purchased with a selling 
+	/// plan. 
+	open class SellingPlanFixedPriceAdjustment: GraphQL.AbstractResponse, GraphQLObject, SellingPlanPriceAdjustmentValue {
+		public typealias Query = SellingPlanFixedPriceAdjustmentQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
-				case "cursor":
-				guard let value = value as? String else {
-					throw SchemaViolationError(type: MoneyV2Edge.self, field: fieldName, value: fieldValue)
-				}
-				return value
-
-				case "node":
+				case "price":
 				guard let value = value as? [String: Any] else {
-					throw SchemaViolationError(type: MoneyV2Edge.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: SellingPlanFixedPriceAdjustment.self, field: fieldName, value: fieldValue)
 				}
 				return try MoneyV2(fields: value)
 
 				default:
-				throw SchemaViolationError(type: MoneyV2Edge.self, field: fieldName, value: fieldValue)
+				throw SchemaViolationError(type: SellingPlanFixedPriceAdjustment.self, field: fieldName, value: fieldValue)
 			}
 		}
 
-		/// A cursor for use in pagination. 
-		open var cursor: String {
-			return internalGetCursor()
+		/// A new price of the variant when it's purchased with the selling plan. 
+		open var price: Storefront.MoneyV2 {
+			return internalGetPrice()
 		}
 
-		func internalGetCursor(alias: String? = nil) -> String {
-			return field(field: "cursor", aliasSuffix: alias) as! String
-		}
-
-		/// The item at the end of MoneyV2Edge. 
-		open var node: Storefront.MoneyV2 {
-			return internalGetNode()
-		}
-
-		func internalGetNode(alias: String? = nil) -> Storefront.MoneyV2 {
-			return field(field: "node", aliasSuffix: alias) as! Storefront.MoneyV2
+		func internalGetPrice(alias: String? = nil) -> Storefront.MoneyV2 {
+			return field(field: "price", aliasSuffix: alias) as! Storefront.MoneyV2
 		}
 
 		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
 				switch($0) {
-					case "node":
-					response.append(internalGetNode())
-					response.append(contentsOf: internalGetNode().childResponseObjectMap())
+					case "price":
+					response.append(internalGetPrice())
+					response.append(contentsOf: internalGetPrice().childResponseObjectMap())
 
 					default:
 					break

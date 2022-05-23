@@ -27,7 +27,9 @@
 import Foundation
 
 extension Storefront {
-	/// A version of the API. 
+	/// A version of the API, as defined by [Shopify API 
+	/// versioning](https://shopify.dev/api/usage/versioning). Versions are 
+	/// commonly referred to by their handle (for example, `2021-10`). 
 	open class ApiVersionQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = ApiVersion
 
@@ -46,7 +48,11 @@ extension Storefront {
 			return self
 		}
 
-		/// Whether the version is supported by Shopify. 
+		/// Whether the version is actively supported by Shopify. Supported API 
+		/// versions are guaranteed to be stable. Unsupported API versions include 
+		/// unstable, release candidate, and end-of-life versions that are marked as 
+		/// unsupported. For more information, refer to 
+		/// [Versioning](https://shopify.dev/api/usage/versioning). 
 		@discardableResult
 		open func supported(alias: String? = nil) -> ApiVersionQuery {
 			addField(field: "supported", aliasSuffix: alias)
@@ -54,7 +60,9 @@ extension Storefront {
 		}
 	}
 
-	/// A version of the API. 
+	/// A version of the API, as defined by [Shopify API 
+	/// versioning](https://shopify.dev/api/usage/versioning). Versions are 
+	/// commonly referred to by their handle (for example, `2021-10`). 
 	open class ApiVersion: GraphQL.AbstractResponse, GraphQLObject {
 		public typealias Query = ApiVersionQuery
 
@@ -103,7 +111,11 @@ extension Storefront {
 			return field(field: "handle", aliasSuffix: alias) as! String
 		}
 
-		/// Whether the version is supported by Shopify. 
+		/// Whether the version is actively supported by Shopify. Supported API 
+		/// versions are guaranteed to be stable. Unsupported API versions include 
+		/// unstable, release candidate, and end-of-life versions that are marked as 
+		/// unsupported. For more information, refer to 
+		/// [Versioning](https://shopify.dev/api/usage/versioning). 
 		open var supported: Bool {
 			return internalGetSupported()
 		}

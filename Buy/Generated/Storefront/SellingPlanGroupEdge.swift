@@ -1,5 +1,5 @@
 //
-//  ProductVariantPricePairEdge.swift
+//  SellingPlanGroupEdge.swift
 //  Buy
 //
 //  Created by Shopify.
@@ -27,22 +27,22 @@
 import Foundation
 
 extension Storefront {
-	/// An auto-generated type which holds one ProductVariantPricePair and a cursor 
-	/// during pagination. 
-	open class ProductVariantPricePairEdgeQuery: GraphQL.AbstractQuery, GraphQLQuery {
-		public typealias Response = ProductVariantPricePairEdge
+	/// An auto-generated type which holds one SellingPlanGroup and a cursor during 
+	/// pagination. 
+	open class SellingPlanGroupEdgeQuery: GraphQL.AbstractQuery, GraphQLQuery {
+		public typealias Response = SellingPlanGroupEdge
 
 		/// A cursor for use in pagination. 
 		@discardableResult
-		open func cursor(alias: String? = nil) -> ProductVariantPricePairEdgeQuery {
+		open func cursor(alias: String? = nil) -> SellingPlanGroupEdgeQuery {
 			addField(field: "cursor", aliasSuffix: alias)
 			return self
 		}
 
-		/// The item at the end of ProductVariantPricePairEdge. 
+		/// The item at the end of SellingPlanGroupEdge. 
 		@discardableResult
-		open func node(alias: String? = nil, _ subfields: (ProductVariantPricePairQuery) -> Void) -> ProductVariantPricePairEdgeQuery {
-			let subquery = ProductVariantPricePairQuery()
+		open func node(alias: String? = nil, _ subfields: (SellingPlanGroupQuery) -> Void) -> SellingPlanGroupEdgeQuery {
+			let subquery = SellingPlanGroupQuery()
 			subfields(subquery)
 
 			addField(field: "node", aliasSuffix: alias, subfields: subquery)
@@ -50,28 +50,28 @@ extension Storefront {
 		}
 	}
 
-	/// An auto-generated type which holds one ProductVariantPricePair and a cursor 
-	/// during pagination. 
-	open class ProductVariantPricePairEdge: GraphQL.AbstractResponse, GraphQLObject {
-		public typealias Query = ProductVariantPricePairEdgeQuery
+	/// An auto-generated type which holds one SellingPlanGroup and a cursor during 
+	/// pagination. 
+	open class SellingPlanGroupEdge: GraphQL.AbstractResponse, GraphQLObject {
+		public typealias Query = SellingPlanGroupEdgeQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
 				case "cursor":
 				guard let value = value as? String else {
-					throw SchemaViolationError(type: ProductVariantPricePairEdge.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: SellingPlanGroupEdge.self, field: fieldName, value: fieldValue)
 				}
 				return value
 
 				case "node":
 				guard let value = value as? [String: Any] else {
-					throw SchemaViolationError(type: ProductVariantPricePairEdge.self, field: fieldName, value: fieldValue)
+					throw SchemaViolationError(type: SellingPlanGroupEdge.self, field: fieldName, value: fieldValue)
 				}
-				return try ProductVariantPricePair(fields: value)
+				return try SellingPlanGroup(fields: value)
 
 				default:
-				throw SchemaViolationError(type: ProductVariantPricePairEdge.self, field: fieldName, value: fieldValue)
+				throw SchemaViolationError(type: SellingPlanGroupEdge.self, field: fieldName, value: fieldValue)
 			}
 		}
 
@@ -84,13 +84,13 @@ extension Storefront {
 			return field(field: "cursor", aliasSuffix: alias) as! String
 		}
 
-		/// The item at the end of ProductVariantPricePairEdge. 
-		open var node: Storefront.ProductVariantPricePair {
+		/// The item at the end of SellingPlanGroupEdge. 
+		open var node: Storefront.SellingPlanGroup {
 			return internalGetNode()
 		}
 
-		func internalGetNode(alias: String? = nil) -> Storefront.ProductVariantPricePair {
-			return field(field: "node", aliasSuffix: alias) as! Storefront.ProductVariantPricePair
+		func internalGetNode(alias: String? = nil) -> Storefront.SellingPlanGroup {
+			return field(field: "node", aliasSuffix: alias) as! Storefront.SellingPlanGroup
 		}
 
 		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
