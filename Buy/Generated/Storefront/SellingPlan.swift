@@ -31,6 +31,16 @@ extension Storefront {
 	open class SellingPlanQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = SellingPlan
 
+		/// The initial payment due for the purchase. 
+		@discardableResult
+		open func checkoutCharge(alias: String? = nil, _ subfields: (SellingPlanCheckoutChargeQuery) -> Void) -> SellingPlanQuery {
+			let subquery = SellingPlanCheckoutChargeQuery()
+			subfields(subquery)
+
+			addField(field: "checkoutCharge", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
 		/// The description of the selling plan. 
 		@discardableResult
 		open func description(alias: String? = nil) -> SellingPlanQuery {
@@ -55,7 +65,12 @@ extension Storefront {
 
 		/// The selling plan options available in the drop-down list in the storefront. 
 		/// For example, 'Delivery every week' or 'Delivery every 2 weeks' specifies 
-		/// the delivery frequency options for the product. 
+		/// the delivery frequency options for the product. Individual selling plans 
+		/// contribute their options to the associated selling plan group. For example, 
+		/// a selling plan group might have an option called `option1: Delivery every`. 
+		/// One selling plan in that group could contribute `option1: 2 weeks` with the 
+		/// pricing for that option, and another selling plan could contribute 
+		/// `option1: 4 weeks`, with different pricing. 
 		@discardableResult
 		open func options(alias: String? = nil, _ subfields: (SellingPlanOptionQuery) -> Void) -> SellingPlanQuery {
 			let subquery = SellingPlanOptionQuery()
@@ -91,6 +106,12 @@ extension Storefront {
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
+				case "checkoutCharge":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: SellingPlan.self, field: fieldName, value: fieldValue)
+				}
+				return try SellingPlanCheckoutCharge(fields: value)
+
 				case "description":
 				if value is NSNull { return nil }
 				guard let value = value as? String else {
@@ -133,6 +154,15 @@ extension Storefront {
 			}
 		}
 
+		/// The initial payment due for the purchase. 
+		open var checkoutCharge: Storefront.SellingPlanCheckoutCharge {
+			return internalGetCheckoutCharge()
+		}
+
+		func internalGetCheckoutCharge(alias: String? = nil) -> Storefront.SellingPlanCheckoutCharge {
+			return field(field: "checkoutCharge", aliasSuffix: alias) as! Storefront.SellingPlanCheckoutCharge
+		}
+
 		/// The description of the selling plan. 
 		open var description: String? {
 			return internalGetDescription()
@@ -163,7 +193,12 @@ extension Storefront {
 
 		/// The selling plan options available in the drop-down list in the storefront. 
 		/// For example, 'Delivery every week' or 'Delivery every 2 weeks' specifies 
-		/// the delivery frequency options for the product. 
+		/// the delivery frequency options for the product. Individual selling plans 
+		/// contribute their options to the associated selling plan group. For example, 
+		/// a selling plan group might have an option called `option1: Delivery every`. 
+		/// One selling plan in that group could contribute `option1: 2 weeks` with the 
+		/// pricing for that option, and another selling plan could contribute 
+		/// `option1: 4 weeks`, with different pricing. 
 		open var options: [Storefront.SellingPlanOption] {
 			return internalGetOptions()
 		}
@@ -192,7 +227,30 @@ extension Storefront {
 		}
 
 		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
-			return []
+			var response: [GraphQL.AbstractResponse] = []
+			objectMap.keys.forEach {
+				switch($0) {
+					case "checkoutCharge":
+					response.append(internalGetCheckoutCharge())
+					response.append(contentsOf: internalGetCheckoutCharge().childResponseObjectMap())
+
+					case "options":
+					internalGetOptions().forEach {
+						response.append($0)
+						response.append(contentsOf: $0.childResponseObjectMap())
+					}
+
+					case "priceAdjustments":
+					internalGetPriceAdjustments().forEach {
+						response.append($0)
+						response.append(contentsOf: $0.childResponseObjectMap())
+					}
+
+					default:
+					break
+				}
+			}
+			return response
 		}
 	}
 }

@@ -129,7 +129,7 @@ extension Storefront {
 		/// - parameters:
 		///     - handle: The handle of the blog.
 		///
-		@available(*, deprecated, message:"Use `blog` instead")
+		@available(*, deprecated, message:"Use `blog` instead.")
 		@discardableResult
 		open func blogByHandle(alias: String? = nil, handle: String, _ subfields: (BlogQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -204,10 +204,12 @@ extension Storefront {
 			return self
 		}
 
-		/// Find a cart by its ID. 
+		/// Retrieve a cart by its ID. For more information, refer to [Manage a cart 
+		/// with the Storefront 
+		/// API](https://shopify.dev/custom-storefronts/cart/manage). 
 		///
 		/// - parameters:
-		///     - id: The id of the cart.
+		///     - id: The ID of the cart.
 		///
 		@discardableResult
 		open func cart(alias: String? = nil, id: GraphQL.ID, _ subfields: (CartQuery) -> Void) -> QueryRootQuery {
@@ -256,7 +258,7 @@ extension Storefront {
 		/// - parameters:
 		///     - handle: The handle of the collection.
 		///
-		@available(*, deprecated, message:"Use `collection` instead")
+		@available(*, deprecated, message:"Use `collection` instead.")
 		@discardableResult
 		open func collectionByHandle(alias: String? = nil, handle: String, _ subfields: (CollectionQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -505,7 +507,7 @@ extension Storefront {
 		/// - parameters:
 		///     - handle: The handle of the page.
 		///
-		@available(*, deprecated, message:"Use `page` instead")
+		@available(*, deprecated, message:"Use `page` instead.")
 		@discardableResult
 		open func pageByHandle(alias: String? = nil, handle: String, _ subfields: (PageQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -610,9 +612,9 @@ extension Storefront {
 		/// Find a product by its handle. 
 		///
 		/// - parameters:
-		///     - handle: The handle of the product.
+		///     - handle: A unique string that identifies the product. Handles are automatically generated based on the product's title, and are always lowercase. Whitespace and special characters are replaced with a hyphen: `-`. If there are multiple consecutive whitespace or special characters, then they're replaced with a single hyphen. Whitespace or special characters at the beginning are removed. If a duplicate product title is used, then the handle is auto-incremented by one. For example, if you had two products called `Potion`, then their handles would be `potion` and `potion-1`. After a product has been created, changing the product title doesn't update the handle.
 		///
-		@available(*, deprecated, message:"Use `product` instead")
+		@available(*, deprecated, message:"Use `product` instead.")
 		@discardableResult
 		open func productByHandle(alias: String? = nil, handle: String, _ subfields: (ProductQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -775,6 +777,48 @@ extension Storefront {
 			subfields(subquery)
 
 			addField(field: "shop", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
+		/// A list of redirects for a shop. 
+		///
+		/// - parameters:
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///     - reverse: Reverse the order of the underlying list.
+		///
+		@discardableResult
+		open func urlRedirects(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (UrlRedirectConnectionQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			if let reverse = reverse {
+				args.append("reverse:\(reverse)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = UrlRedirectConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "urlRedirects", aliasSuffix: alias, args: argsString, subfields: subquery)
 			return self
 		}
 	}
@@ -954,6 +998,12 @@ extension Storefront {
 				}
 				return try Shop(fields: value)
 
+				case "urlRedirects":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try UrlRedirectConnection(fields: value)
+
 				default:
 				throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
 			}
@@ -986,12 +1036,12 @@ extension Storefront {
 		}
 
 		/// Find a blog by its handle. 
-		@available(*, deprecated, message:"Use `blog` instead")
+		@available(*, deprecated, message:"Use `blog` instead.")
 		open var blogByHandle: Storefront.Blog? {
 			return internalGetBlogByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `blog` instead")
+		@available(*, deprecated, message:"Use `blog` instead.")
 
 		open func aliasedBlogByHandle(alias: String) -> Storefront.Blog? {
 			return internalGetBlogByHandle(alias: alias)
@@ -1014,7 +1064,9 @@ extension Storefront {
 			return field(field: "blogs", aliasSuffix: alias) as! Storefront.BlogConnection
 		}
 
-		/// Find a cart by its ID. 
+		/// Retrieve a cart by its ID. For more information, refer to [Manage a cart 
+		/// with the Storefront 
+		/// API](https://shopify.dev/custom-storefronts/cart/manage). 
 		open var cart: Storefront.Cart? {
 			return internalGetCart()
 		}
@@ -1041,12 +1093,12 @@ extension Storefront {
 		}
 
 		/// Find a collection by its handle. 
-		@available(*, deprecated, message:"Use `collection` instead")
+		@available(*, deprecated, message:"Use `collection` instead.")
 		open var collectionByHandle: Storefront.Collection? {
 			return internalGetCollectionByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `collection` instead")
+		@available(*, deprecated, message:"Use `collection` instead.")
 
 		open func aliasedCollectionByHandle(alias: String) -> Storefront.Collection? {
 			return internalGetCollectionByHandle(alias: alias)
@@ -1158,12 +1210,12 @@ extension Storefront {
 		}
 
 		/// Find a page by its handle. 
-		@available(*, deprecated, message:"Use `page` instead")
+		@available(*, deprecated, message:"Use `page` instead.")
 		open var pageByHandle: Storefront.Page? {
 			return internalGetPageByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `page` instead")
+		@available(*, deprecated, message:"Use `page` instead.")
 
 		open func aliasedPageByHandle(alias: String) -> Storefront.Page? {
 			return internalGetPageByHandle(alias: alias)
@@ -1200,12 +1252,12 @@ extension Storefront {
 		}
 
 		/// Find a product by its handle. 
-		@available(*, deprecated, message:"Use `product` instead")
+		@available(*, deprecated, message:"Use `product` instead.")
 		open var productByHandle: Storefront.Product? {
 			return internalGetProductByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `product` instead")
+		@available(*, deprecated, message:"Use `product` instead.")
 
 		open func aliasedProductByHandle(alias: String) -> Storefront.Product? {
 			return internalGetProductByHandle(alias: alias)
@@ -1289,6 +1341,19 @@ extension Storefront {
 
 		func internalGetShop(alias: String? = nil) -> Storefront.Shop {
 			return field(field: "shop", aliasSuffix: alias) as! Storefront.Shop
+		}
+
+		/// A list of redirects for a shop. 
+		open var urlRedirects: Storefront.UrlRedirectConnection {
+			return internalGetUrlRedirects()
+		}
+
+		open func aliasedUrlRedirects(alias: String) -> Storefront.UrlRedirectConnection {
+			return internalGetUrlRedirects(alias: alias)
+		}
+
+		func internalGetUrlRedirects(alias: String? = nil) -> Storefront.UrlRedirectConnection {
+			return field(field: "urlRedirects", aliasSuffix: alias) as! Storefront.UrlRedirectConnection
 		}
 
 		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
@@ -1428,6 +1493,10 @@ extension Storefront {
 					case "shop":
 					response.append(internalGetShop())
 					response.append(contentsOf: internalGetShop().childResponseObjectMap())
+
+					case "urlRedirects":
+					response.append(internalGetUrlRedirects())
+					response.append(contentsOf: internalGetUrlRedirects().childResponseObjectMap())
 
 					default:
 					break

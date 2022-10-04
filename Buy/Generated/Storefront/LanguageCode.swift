@@ -27,7 +27,7 @@
 import Foundation
 
 extension Storefront {
-	/// ISO 369 language codes supported by Shopify. 
+	/// ISO 639-1 language codes supported by Shopify. 
 	public enum LanguageCode: String {
 		/// Afrikaans. 
 		case af = "AF"
@@ -245,7 +245,7 @@ extension Storefront {
 		/// Malagasy. 
 		case mg = "MG"
 
-		/// Maori. 
+		/// Māori. 
 		case mi = "MI"
 
 		/// Macedonian. 

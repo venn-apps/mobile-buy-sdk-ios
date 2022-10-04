@@ -48,15 +48,18 @@ extension Storefront {
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
 		/// on sale, when `compareAtPrice` is higher than `price`. 
-		@available(*, deprecated, message:"Use `compareAtPriceV2` instead")
 		@discardableResult
-		open func compareAtPrice(alias: String? = nil) -> ProductVariantQuery {
-			addField(field: "compareAtPrice", aliasSuffix: alias)
+		open func compareAtPrice(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> ProductVariantQuery {
+			let subquery = MoneyV2Query()
+			subfields(subquery)
+
+			addField(field: "compareAtPrice", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
 		/// on sale, when `compareAtPriceV2` is higher than `priceV2`. 
+		@available(*, deprecated, message:"Use `compareAtPrice` instead.")
 		@discardableResult
 		open func compareAtPriceV2(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> ProductVariantQuery {
 			let subquery = MoneyV2Query()
@@ -95,8 +98,8 @@ extension Storefront {
 		/// Returns a metafield found by namespace and key. 
 		///
 		/// - parameters:
-		///     - namespace: Container for a set of metafields (maximum of 20 characters).
-		///     - key: Identifier for the metafield (maximum of 30 characters).
+		///     - namespace: A container for a set of metafields.
+		///     - key: The identifier for the metafield.
 		///
 		@discardableResult
 		open func metafield(alias: String? = nil, namespace: String, key: String, _ subfields: (MetafieldQuery) -> Void) -> ProductVariantQuery {
@@ -115,48 +118,21 @@ extension Storefront {
 			return self
 		}
 
-		/// A paginated list of metafields associated with the resource. 
+		/// The metafields associated with the resource matching the supplied list of 
+		/// namespaces and keys. 
 		///
 		/// - parameters:
-		///     - namespace: Container for a set of metafields (maximum of 20 characters).
-		///     - first: Returns up to the first `n` elements from the list.
-		///     - after: Returns the elements that come after the specified cursor.
-		///     - last: Returns up to the last `n` elements from the list.
-		///     - before: Returns the elements that come before the specified cursor.
-		///     - reverse: Reverse the order of the underlying list.
+		///     - identifiers: The list of metafields to retrieve by namespace and key.
 		///
-		@available(*, deprecated, message:"The `metafields` field will be removed in the future in favor of using [aliases](https://graphql.org/learn/queries/#aliases) with the `metafield` field.\n")
 		@discardableResult
-		open func metafields(alias: String? = nil, namespace: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (MetafieldConnectionQuery) -> Void) -> ProductVariantQuery {
+		open func metafields(alias: String? = nil, identifiers: [HasMetafieldsIdentifier], _ subfields: (MetafieldQuery) -> Void) -> ProductVariantQuery {
 			var args: [String] = []
 
-			if let namespace = namespace {
-				args.append("namespace:\(GraphQL.quoteString(input: namespace))")
-			}
+			args.append("identifiers:[\(identifiers.map{ "\($0.serialize())" }.joined(separator: ","))]")
 
-			if let first = first {
-				args.append("first:\(first)")
-			}
+			let argsString = "(\(args.joined(separator: ",")))"
 
-			if let after = after {
-				args.append("after:\(GraphQL.quoteString(input: after))")
-			}
-
-			if let last = last {
-				args.append("last:\(last)")
-			}
-
-			if let before = before {
-				args.append("before:\(GraphQL.quoteString(input: before))")
-			}
-
-			if let reverse = reverse {
-				args.append("reverse:\(reverse)")
-			}
-
-			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
-
-			let subquery = MetafieldConnectionQuery()
+			let subquery = MetafieldQuery()
 			subfields(subquery)
 
 			addField(field: "metafields", aliasSuffix: alias, args: argsString, subfields: subquery)
@@ -164,14 +140,17 @@ extension Storefront {
 		}
 
 		/// The product variant’s price. 
-		@available(*, deprecated, message:"Use `priceV2` instead")
 		@discardableResult
-		open func price(alias: String? = nil) -> ProductVariantQuery {
-			addField(field: "price", aliasSuffix: alias)
+		open func price(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> ProductVariantQuery {
+			let subquery = MoneyV2Query()
+			subfields(subquery)
+
+			addField(field: "price", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
 		/// The product variant’s price. 
+		@available(*, deprecated, message:"Use `price` instead.")
 		@discardableResult
 		open func priceV2(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> ProductVariantQuery {
 			let subquery = MoneyV2Query()
@@ -375,10 +354,10 @@ extension Storefront {
 
 				case "compareAtPrice":
 				if value is NSNull { return nil }
-				guard let value = value as? String else {
+				guard let value = value as? [String: Any] else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
-				return Decimal(string: value, locale: GraphQL.posixLocale)
+				return try MoneyV2(fields: value)
 
 				case "compareAtPriceV2":
 				if value is NSNull { return nil }
@@ -414,16 +393,20 @@ extension Storefront {
 				return try Metafield(fields: value)
 
 				case "metafields":
+				guard let value = value as? [Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try value.map { if $0 is NSNull { return nil }
+				guard let value = $0 as? [String: Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try Metafield(fields: value) } as [Any?]
+
+				case "price":
 				guard let value = value as? [String: Any] else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
-				return try MetafieldConnection(fields: value)
-
-				case "price":
-				guard let value = value as? String else {
-					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
-				}
-				return Decimal(string: value, locale: GraphQL.posixLocale)
+				return try MoneyV2(fields: value)
 
 				case "priceV2":
 				guard let value = value as? [String: Any] else {
@@ -533,17 +516,17 @@ extension Storefront {
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
 		/// on sale, when `compareAtPrice` is higher than `price`. 
-		@available(*, deprecated, message:"Use `compareAtPriceV2` instead")
-		open var compareAtPrice: Decimal? {
+		open var compareAtPrice: Storefront.MoneyV2? {
 			return internalGetCompareAtPrice()
 		}
 
-		func internalGetCompareAtPrice(alias: String? = nil) -> Decimal? {
-			return field(field: "compareAtPrice", aliasSuffix: alias) as! Decimal?
+		func internalGetCompareAtPrice(alias: String? = nil) -> Storefront.MoneyV2? {
+			return field(field: "compareAtPrice", aliasSuffix: alias) as! Storefront.MoneyV2?
 		}
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
 		/// on sale, when `compareAtPriceV2` is higher than `priceV2`. 
+		@available(*, deprecated, message:"Use `compareAtPrice` instead.")
 		open var compareAtPriceV2: Storefront.MoneyV2? {
 			return internalGetCompareAtPriceV2()
 		}
@@ -594,33 +577,31 @@ extension Storefront {
 			return field(field: "metafield", aliasSuffix: alias) as! Storefront.Metafield?
 		}
 
-		/// A paginated list of metafields associated with the resource. 
-		@available(*, deprecated, message:"The `metafields` field will be removed in the future in favor of using [aliases](https://graphql.org/learn/queries/#aliases) with the `metafield` field.\n")
-		open var metafields: Storefront.MetafieldConnection {
+		/// The metafields associated with the resource matching the supplied list of 
+		/// namespaces and keys. 
+		open var metafields: [Storefront.Metafield?] {
 			return internalGetMetafields()
 		}
 
-		@available(*, deprecated, message:"The `metafields` field will be removed in the future in favor of using [aliases](https://graphql.org/learn/queries/#aliases) with the `metafield` field.\n")
-
-		open func aliasedMetafields(alias: String) -> Storefront.MetafieldConnection {
+		open func aliasedMetafields(alias: String) -> [Storefront.Metafield?] {
 			return internalGetMetafields(alias: alias)
 		}
 
-		func internalGetMetafields(alias: String? = nil) -> Storefront.MetafieldConnection {
-			return field(field: "metafields", aliasSuffix: alias) as! Storefront.MetafieldConnection
+		func internalGetMetafields(alias: String? = nil) -> [Storefront.Metafield?] {
+			return field(field: "metafields", aliasSuffix: alias) as! [Storefront.Metafield?]
 		}
 
 		/// The product variant’s price. 
-		@available(*, deprecated, message:"Use `priceV2` instead")
-		open var price: Decimal {
+		open var price: Storefront.MoneyV2 {
 			return internalGetPrice()
 		}
 
-		func internalGetPrice(alias: String? = nil) -> Decimal {
-			return field(field: "price", aliasSuffix: alias) as! Decimal
+		func internalGetPrice(alias: String? = nil) -> Storefront.MoneyV2 {
+			return field(field: "price", aliasSuffix: alias) as! Storefront.MoneyV2
 		}
 
 		/// The product variant’s price. 
+		@available(*, deprecated, message:"Use `price` instead.")
 		open var priceV2: Storefront.MoneyV2 {
 			return internalGetPriceV2()
 		}
@@ -753,6 +734,12 @@ extension Storefront {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
 				switch($0) {
+					case "compareAtPrice":
+					if let value = internalGetCompareAtPrice() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
 					case "compareAtPriceV2":
 					if let value = internalGetCompareAtPriceV2() {
 						response.append(value)
@@ -772,8 +759,16 @@ extension Storefront {
 					}
 
 					case "metafields":
-					response.append(internalGetMetafields())
-					response.append(contentsOf: internalGetMetafields().childResponseObjectMap())
+					internalGetMetafields().forEach {
+						if let value = $0 {
+							response.append(value)
+							response.append(contentsOf: value.childResponseObjectMap())
+						}
+					}
+
+					case "price":
+					response.append(internalGetPrice())
+					response.append(contentsOf: internalGetPrice().childResponseObjectMap())
 
 					case "priceV2":
 					response.append(internalGetPriceV2())
