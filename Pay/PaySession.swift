@@ -203,6 +203,7 @@ public class PaySession: NSObject {
 @available(iOS 10.0, *)
 extension PaySession: PKPaymentAuthorizationControllerDelegate {
     
+    @available(macCatalyst 14.0, *)
     public func presentationWindow(for controller: PKPaymentAuthorizationController) -> NSWindow? {
         return nil
     }
