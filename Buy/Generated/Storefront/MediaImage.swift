@@ -38,7 +38,7 @@ extension Storefront {
 			return self
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		@discardableResult
 		open func id(alias: String? = nil) -> MediaImageQuery {
 			addField(field: "id", aliasSuffix: alias)
@@ -59,6 +59,16 @@ extension Storefront {
 		@discardableResult
 		open func mediaContentType(alias: String? = nil) -> MediaImageQuery {
 			addField(field: "mediaContentType", aliasSuffix: alias)
+			return self
+		}
+
+		/// The presentation for a media. 
+		@discardableResult
+		open func presentation(alias: String? = nil, _ subfields: (MediaPresentationQuery) -> Void) -> MediaImageQuery {
+			let subquery = MediaPresentationQuery()
+			subfields(subquery)
+
+			addField(field: "presentation", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
@@ -106,6 +116,13 @@ extension Storefront {
 				}
 				return MediaContentType(rawValue: value) ?? .unknownValue
 
+				case "presentation":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: MediaImage.self, field: fieldName, value: fieldValue)
+				}
+				return try MediaPresentation(fields: value)
+
 				case "previewImage":
 				if value is NSNull { return nil }
 				guard let value = value as? [String: Any] else {
@@ -127,7 +144,7 @@ extension Storefront {
 			return field(field: "alt", aliasSuffix: alias) as! String?
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		open var id: GraphQL.ID {
 			return internalGetId()
 		}
@@ -154,6 +171,15 @@ extension Storefront {
 			return field(field: "mediaContentType", aliasSuffix: alias) as! Storefront.MediaContentType
 		}
 
+		/// The presentation for a media. 
+		open var presentation: Storefront.MediaPresentation? {
+			return internalGetPresentation()
+		}
+
+		func internalGetPresentation(alias: String? = nil) -> Storefront.MediaPresentation? {
+			return field(field: "presentation", aliasSuffix: alias) as! Storefront.MediaPresentation?
+		}
+
 		/// The preview image for the media. 
 		open var previewImage: Storefront.Image? {
 			return internalGetPreviewImage()
@@ -169,6 +195,12 @@ extension Storefront {
 				switch($0) {
 					case "image":
 					if let value = internalGetImage() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
+					case "presentation":
+					if let value = internalGetPresentation() {
 						response.append(value)
 						response.append(contentsOf: value.childResponseObjectMap())
 					}

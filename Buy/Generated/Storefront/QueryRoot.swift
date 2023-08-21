@@ -36,6 +36,26 @@ extension Storefront {
 			return "query " + super.description
 		}
 
+		/// Fetch a specific Article by its ID. 
+		///
+		/// - parameters:
+		///     - id: The ID of the `Article`.
+		///
+		@discardableResult
+		open func article(alias: String? = nil, id: GraphQL.ID, _ subfields: (ArticleQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			args.append("id:\(GraphQL.quoteString(input: "\(id.rawValue)"))")
+
+			let argsString = "(\(args.joined(separator: ",")))"
+
+			let subquery = ArticleQuery()
+			subfields(subquery)
+
+			addField(field: "article", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
 		/// List of the shop's articles. 
 		///
 		/// - parameters:
@@ -226,6 +246,26 @@ extension Storefront {
 			return self
 		}
 
+		/// A poll for the status of the cart checkout completion and order creation. 
+		///
+		/// - parameters:
+		///     - attemptId: The ID of the attempt.
+		///
+		@discardableResult
+		open func cartCompletionAttempt(alias: String? = nil, attemptId: String, _ subfields: (CartCompletionAttemptResultQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			args.append("attemptId:\(GraphQL.quoteString(input: attemptId))")
+
+			let argsString = "(\(args.joined(separator: ",")))"
+
+			let subquery = CartCompletionAttemptResultQuery()
+			subfields(subquery)
+
+			addField(field: "cartCompletionAttempt", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
 		/// Fetch a specific `Collection` by one of its unique attributes. 
 		///
 		/// - parameters:
@@ -332,7 +372,9 @@ extension Storefront {
 			return self
 		}
 
-		/// Find a customer by its access token. 
+		/// The customer associated with the given access token. Tokens are obtained by 
+		/// using the [`customerAccessTokenCreate` 
+		/// mutation](https://shopify.dev/docs/api/storefront/latest/mutations/customerAccessTokenCreate). 
 		///
 		/// - parameters:
 		///     - customerAccessToken: The customer access token.
@@ -415,10 +457,12 @@ extension Storefront {
 			return self
 		}
 
-		/// A storefront menu. 
+		/// Retrieve a [navigation 
+		/// menu](https://help.shopify.com/manual/online-store/menus-and-links) by its 
+		/// handle. 
 		///
 		/// - parameters:
-		///     - handle: Returns a storefront menu by the specified handle.
+		///     - handle: The navigation menu's handle.
 		///
 		@discardableResult
 		open func menu(alias: String? = nil, handle: String, _ subfields: (MenuQuery) -> Void) -> QueryRootQuery {
@@ -432,6 +476,83 @@ extension Storefront {
 			subfields(subquery)
 
 			addField(field: "menu", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
+		/// Fetch a specific Metaobject by one of its unique identifiers. 
+		///
+		/// - parameters:
+		///     - id: The ID of the metaobject.
+		///     - handle: The handle and type of the metaobject.
+		///
+		@discardableResult
+		open func metaobject(alias: String? = nil, id: GraphQL.ID? = nil, handle: MetaobjectHandleInput? = nil, _ subfields: (MetaobjectQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			if let id = id {
+				args.append("id:\(GraphQL.quoteString(input: "\(id.rawValue)"))")
+			}
+
+			if let handle = handle {
+				args.append("handle:\(handle.serialize())")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = MetaobjectQuery()
+			subfields(subquery)
+
+			addField(field: "metaobject", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
+		/// All active metaobjects for the shop. 
+		///
+		/// - parameters:
+		///     - type: The type of metaobject to retrieve.
+		///     - sortKey: The key of a field to sort with. Supports "id" and "updated_at".
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///     - reverse: Reverse the order of the underlying list.
+		///
+		@discardableResult
+		open func metaobjects(alias: String? = nil, type: String, sortKey: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (MetaobjectConnectionQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			args.append("type:\(GraphQL.quoteString(input: type))")
+
+			if let sortKey = sortKey {
+				args.append("sortKey:\(GraphQL.quoteString(input: sortKey))")
+			}
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			if let reverse = reverse {
+				args.append("reverse:\(reverse)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = MetaobjectConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "metaobjects", aliasSuffix: alias, args: argsString, subfields: subquery)
 			return self
 		}
 
@@ -582,6 +703,51 @@ extension Storefront {
 			return self
 		}
 
+		/// List of the predictive search results. 
+		///
+		/// - parameters:
+		///     - limit: Limits the number of results based on `limit_scope`. The value can range from 1 to 10, and the default is 10.
+		///     - limitScope: Decides the distribution of results.
+		///     - query: The search query.
+		///     - searchableFields: Specifies the list of resource fields to use for search. The default fields searched on are TITLE, PRODUCT_TYPE, VARIANT_TITLE, and VENDOR. For the best search experience, you should search on the default field set.
+		///     - types: The types of resources to search for.
+		///     - unavailableProducts: Specifies how unavailable products are displayed in the search results.
+		///
+		@discardableResult
+		open func predictiveSearch(alias: String? = nil, limit: Int32? = nil, limitScope: PredictiveSearchLimitScope? = nil, query: String, searchableFields: [SearchableField]? = nil, types: [PredictiveSearchType]? = nil, unavailableProducts: SearchUnavailableProductsType? = nil, _ subfields: (PredictiveSearchResultQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			args.append("query:\(GraphQL.quoteString(input: query))")
+
+			if let limit = limit {
+				args.append("limit:\(limit)")
+			}
+
+			if let limitScope = limitScope {
+				args.append("limitScope:\(limitScope.rawValue)")
+			}
+
+			if let searchableFields = searchableFields {
+				args.append("searchableFields:[\(searchableFields.map{ "\($0.rawValue)" }.joined(separator: ","))]")
+			}
+
+			if let types = types {
+				args.append("types:[\(types.map{ "\($0.rawValue)" }.joined(separator: ","))]")
+			}
+
+			if let unavailableProducts = unavailableProducts {
+				args.append("unavailableProducts:\(unavailableProducts.rawValue)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = PredictiveSearchResultQuery()
+			subfields(subquery)
+
+			addField(field: "predictiveSearch", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
 		/// Fetch a specific `Product` by one of its unique attributes. 
 		///
 		/// - parameters:
@@ -637,14 +803,19 @@ extension Storefront {
 		///
 		/// - parameters:
 		///     - productId: The id of the product.
+		///     - intent: The recommendation intent that is used to generate product recommendations. You can use intent to generate product recommendations on various pages across the channels, according to different strategies.
 		///
 		@discardableResult
-		open func productRecommendations(alias: String? = nil, productId: GraphQL.ID, _ subfields: (ProductQuery) -> Void) -> QueryRootQuery {
+		open func productRecommendations(alias: String? = nil, productId: GraphQL.ID, intent: ProductRecommendationIntent? = nil, _ subfields: (ProductQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
 
 			args.append("productId:\(GraphQL.quoteString(input: "\(productId.rawValue)"))")
 
-			let argsString = "(\(args.joined(separator: ",")))"
+			if let intent = intent {
+				args.append("intent:\(intent.rawValue)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
 
 			let subquery = ProductQuery()
 			subfields(subquery)
@@ -770,6 +941,76 @@ extension Storefront {
 			return self
 		}
 
+		/// List of the search results. 
+		///
+		/// - parameters:
+		///     - query: The search query.
+		///     - prefix: Specifies whether to perform a partial word match on the last search term.
+		///     - productFilters: Returns a subset of products matching all product filters.
+		///     - reverse: Reverse the order of the underlying list.
+		///     - sortKey: Sort the underlying list by the given key.
+		///     - types: The types of resrouces to search for.
+		///     - unavailableProducts: Specifies how unavailable products are displayed in the search results.
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///
+		@discardableResult
+		open func search(alias: String? = nil, query: String, `prefix`: SearchPrefixQueryType? = nil, productFilters: [ProductFilter]? = nil, reverse: Bool? = nil, sortKey: SearchSortKeys? = nil, types: [SearchType]? = nil, unavailableProducts: SearchUnavailableProductsType? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, _ subfields: (SearchResultItemConnectionQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			args.append("query:\(GraphQL.quoteString(input: query))")
+
+			if let `prefix` = `prefix` {
+				args.append("prefix:\(prefix.rawValue)")
+			}
+
+			if let productFilters = productFilters {
+				args.append("productFilters:[\(productFilters.map{ "\($0.serialize())" }.joined(separator: ","))]")
+			}
+
+			if let reverse = reverse {
+				args.append("reverse:\(reverse)")
+			}
+
+			if let sortKey = sortKey {
+				args.append("sortKey:\(sortKey.rawValue)")
+			}
+
+			if let types = types {
+				args.append("types:[\(types.map{ "\($0.rawValue)" }.joined(separator: ","))]")
+			}
+
+			if let unavailableProducts = unavailableProducts {
+				args.append("unavailableProducts:\(unavailableProducts.rawValue)")
+			}
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = SearchResultItemConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "search", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
 		/// The shop associated with the storefront access token. 
 		@discardableResult
 		open func shop(alias: String? = nil, _ subfields: (ShopQuery) -> Void) -> QueryRootQuery {
@@ -788,9 +1029,16 @@ extension Storefront {
 		///     - last: Returns up to the last `n` elements from the list.
 		///     - before: Returns the elements that come before the specified cursor.
 		///     - reverse: Reverse the order of the underlying list.
+		///     - query: Supported filter parameters:
+		///         - `created_at`
+		///         - `path`
+		///         - `target`
+		///        
+		///        See the detailed [search syntax](https://shopify.dev/api/usage/search-syntax)
+		///        for more information about using filters.
 		///
 		@discardableResult
-		open func urlRedirects(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (UrlRedirectConnectionQuery) -> Void) -> QueryRootQuery {
+		open func urlRedirects(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, query: String? = nil, _ subfields: (UrlRedirectConnectionQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
 
 			if let first = first {
@@ -813,6 +1061,10 @@ extension Storefront {
 				args.append("reverse:\(reverse)")
 			}
 
+			if let query = query {
+				args.append("query:\(GraphQL.quoteString(input: query))")
+			}
+
 			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
 
 			let subquery = UrlRedirectConnectionQuery()
@@ -831,6 +1083,13 @@ extension Storefront {
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
+				case "article":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try Article(fields: value)
+
 				case "articles":
 				guard let value = value as? [String: Any] else {
 					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
@@ -863,6 +1122,13 @@ extension Storefront {
 					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
 				}
 				return try Cart(fields: value)
+
+				case "cartCompletionAttempt":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try UnknownCartCompletionAttemptResult.create(fields: value)
 
 				case "collection":
 				if value is NSNull { return nil }
@@ -910,6 +1176,19 @@ extension Storefront {
 				}
 				return try Menu(fields: value)
 
+				case "metaobject":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try Metaobject(fields: value)
+
+				case "metaobjects":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try MetaobjectConnection(fields: value)
+
 				case "node":
 				if value is NSNull { return nil }
 				guard let value = value as? [String: Any] else {
@@ -946,6 +1225,13 @@ extension Storefront {
 					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
 				}
 				return try PageConnection(fields: value)
+
+				case "predictiveSearch":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try PredictiveSearchResult(fields: value)
 
 				case "product":
 				if value is NSNull { return nil }
@@ -992,6 +1278,12 @@ extension Storefront {
 				}
 				return try value.map { return try ApiVersion(fields: $0) }
 
+				case "search":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try SearchResultItemConnection(fields: value)
+
 				case "shop":
 				guard let value = value as? [String: Any] else {
 					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
@@ -1007,6 +1299,19 @@ extension Storefront {
 				default:
 				throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
 			}
+		}
+
+		/// Fetch a specific Article by its ID. 
+		open var article: Storefront.Article? {
+			return internalGetArticle()
+		}
+
+		open func aliasedArticle(alias: String) -> Storefront.Article? {
+			return internalGetArticle(alias: alias)
+		}
+
+		func internalGetArticle(alias: String? = nil) -> Storefront.Article? {
+			return field(field: "article", aliasSuffix: alias) as! Storefront.Article?
 		}
 
 		/// List of the shop's articles. 
@@ -1079,6 +1384,19 @@ extension Storefront {
 			return field(field: "cart", aliasSuffix: alias) as! Storefront.Cart?
 		}
 
+		/// A poll for the status of the cart checkout completion and order creation. 
+		open var cartCompletionAttempt: CartCompletionAttemptResult? {
+			return internalGetCartCompletionAttempt()
+		}
+
+		open func aliasedCartCompletionAttempt(alias: String) -> CartCompletionAttemptResult? {
+			return internalGetCartCompletionAttempt(alias: alias)
+		}
+
+		func internalGetCartCompletionAttempt(alias: String? = nil) -> CartCompletionAttemptResult? {
+			return field(field: "cartCompletionAttempt", aliasSuffix: alias) as! CartCompletionAttemptResult?
+		}
+
 		/// Fetch a specific `Collection` by one of its unique attributes. 
 		open var collection: Storefront.Collection? {
 			return internalGetCollection()
@@ -1121,7 +1439,9 @@ extension Storefront {
 			return field(field: "collections", aliasSuffix: alias) as! Storefront.CollectionConnection
 		}
 
-		/// Find a customer by its access token. 
+		/// The customer associated with the given access token. Tokens are obtained by 
+		/// using the [`customerAccessTokenCreate` 
+		/// mutation](https://shopify.dev/docs/api/storefront/latest/mutations/customerAccessTokenCreate). 
 		open var customer: Storefront.Customer? {
 			return internalGetCustomer()
 		}
@@ -1157,7 +1477,9 @@ extension Storefront {
 			return field(field: "locations", aliasSuffix: alias) as! Storefront.LocationConnection
 		}
 
-		/// A storefront menu. 
+		/// Retrieve a [navigation 
+		/// menu](https://help.shopify.com/manual/online-store/menus-and-links) by its 
+		/// handle. 
 		open var menu: Storefront.Menu? {
 			return internalGetMenu()
 		}
@@ -1168,6 +1490,32 @@ extension Storefront {
 
 		func internalGetMenu(alias: String? = nil) -> Storefront.Menu? {
 			return field(field: "menu", aliasSuffix: alias) as! Storefront.Menu?
+		}
+
+		/// Fetch a specific Metaobject by one of its unique identifiers. 
+		open var metaobject: Storefront.Metaobject? {
+			return internalGetMetaobject()
+		}
+
+		open func aliasedMetaobject(alias: String) -> Storefront.Metaobject? {
+			return internalGetMetaobject(alias: alias)
+		}
+
+		func internalGetMetaobject(alias: String? = nil) -> Storefront.Metaobject? {
+			return field(field: "metaobject", aliasSuffix: alias) as! Storefront.Metaobject?
+		}
+
+		/// All active metaobjects for the shop. 
+		open var metaobjects: Storefront.MetaobjectConnection {
+			return internalGetMetaobjects()
+		}
+
+		open func aliasedMetaobjects(alias: String) -> Storefront.MetaobjectConnection {
+			return internalGetMetaobjects(alias: alias)
+		}
+
+		func internalGetMetaobjects(alias: String? = nil) -> Storefront.MetaobjectConnection {
+			return field(field: "metaobjects", aliasSuffix: alias) as! Storefront.MetaobjectConnection
 		}
 
 		/// Returns a specific node by ID. 
@@ -1236,6 +1584,19 @@ extension Storefront {
 
 		func internalGetPages(alias: String? = nil) -> Storefront.PageConnection {
 			return field(field: "pages", aliasSuffix: alias) as! Storefront.PageConnection
+		}
+
+		/// List of the predictive search results. 
+		open var predictiveSearch: Storefront.PredictiveSearchResult? {
+			return internalGetPredictiveSearch()
+		}
+
+		open func aliasedPredictiveSearch(alias: String) -> Storefront.PredictiveSearchResult? {
+			return internalGetPredictiveSearch(alias: alias)
+		}
+
+		func internalGetPredictiveSearch(alias: String? = nil) -> Storefront.PredictiveSearchResult? {
+			return field(field: "predictiveSearch", aliasSuffix: alias) as! Storefront.PredictiveSearchResult?
 		}
 
 		/// Fetch a specific `Product` by one of its unique attributes. 
@@ -1334,6 +1695,19 @@ extension Storefront {
 			return field(field: "publicApiVersions", aliasSuffix: alias) as! [Storefront.ApiVersion]
 		}
 
+		/// List of the search results. 
+		open var search: Storefront.SearchResultItemConnection {
+			return internalGetSearch()
+		}
+
+		open func aliasedSearch(alias: String) -> Storefront.SearchResultItemConnection {
+			return internalGetSearch(alias: alias)
+		}
+
+		func internalGetSearch(alias: String? = nil) -> Storefront.SearchResultItemConnection {
+			return field(field: "search", aliasSuffix: alias) as! Storefront.SearchResultItemConnection
+		}
+
 		/// The shop associated with the storefront access token. 
 		open var shop: Storefront.Shop {
 			return internalGetShop()
@@ -1360,6 +1734,12 @@ extension Storefront {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
 				switch($0) {
+					case "article":
+					if let value = internalGetArticle() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
 					case "articles":
 					response.append(internalGetArticles())
 					response.append(contentsOf: internalGetArticles().childResponseObjectMap())
@@ -1384,6 +1764,12 @@ extension Storefront {
 					if let value = internalGetCart() {
 						response.append(value)
 						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
+					case "cartCompletionAttempt":
+					if let value = internalGetCartCompletionAttempt() {
+						response.append((value as! GraphQL.AbstractResponse))
+						response.append(contentsOf: (value as! GraphQL.AbstractResponse).childResponseObjectMap())
 					}
 
 					case "collection":
@@ -1422,6 +1808,16 @@ extension Storefront {
 						response.append(contentsOf: value.childResponseObjectMap())
 					}
 
+					case "metaobject":
+					if let value = internalGetMetaobject() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
+					case "metaobjects":
+					response.append(internalGetMetaobjects())
+					response.append(contentsOf: internalGetMetaobjects().childResponseObjectMap())
+
 					case "node":
 					if let value = internalGetNode() {
 						response.append((value as! GraphQL.AbstractResponse))
@@ -1451,6 +1847,12 @@ extension Storefront {
 					case "pages":
 					response.append(internalGetPages())
 					response.append(contentsOf: internalGetPages().childResponseObjectMap())
+
+					case "predictiveSearch":
+					if let value = internalGetPredictiveSearch() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
 
 					case "product":
 					if let value = internalGetProduct() {
@@ -1489,6 +1891,10 @@ extension Storefront {
 						response.append($0)
 						response.append(contentsOf: $0.childResponseObjectMap())
 					}
+
+					case "search":
+					response.append(internalGetSearch())
+					response.append(contentsOf: internalGetSearch().childResponseObjectMap())
 
 					case "shop":
 					response.append(internalGetShop())

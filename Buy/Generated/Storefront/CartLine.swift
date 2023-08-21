@@ -96,7 +96,7 @@ extension Storefront {
 			return self
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		@discardableResult
 		open func id(alias: String? = nil) -> CartLineQuery {
 			addField(field: "id", aliasSuffix: alias)
@@ -133,7 +133,7 @@ extension Storefront {
 	}
 
 	/// Represents information about the merchandise in the cart. 
-	open class CartLine: GraphQL.AbstractResponse, GraphQLObject, Node {
+	open class CartLine: GraphQL.AbstractResponse, GraphQLObject, BaseCartLine, Node {
 		public typealias Query = CartLineQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
@@ -254,7 +254,7 @@ extension Storefront {
 			return field(field: "estimatedCost", aliasSuffix: alias) as! Storefront.CartLineEstimatedCost
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		open var id: GraphQL.ID {
 			return internalGetId()
 		}

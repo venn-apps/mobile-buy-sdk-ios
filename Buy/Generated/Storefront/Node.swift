@@ -48,7 +48,7 @@ extension Storefront {
 	open class NodeQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = Node
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		@discardableResult
 		open func id(alias: String? = nil) -> NodeQuery {
 			addField(field: "id", aliasSuffix: alias)
@@ -203,6 +203,21 @@ extension Storefront {
 		/// [nodes](https://shopify.dev/api/admin-graphql/unstable/queries/nodes) 
 		/// queries. 
 		@discardableResult
+		open func onComponentizableCartLine(subfields: (ComponentizableCartLineQuery) -> Void) -> NodeQuery {
+			let subquery = ComponentizableCartLineQuery()
+			subfields(subquery)
+			addInlineFragment(on: "ComponentizableCartLine", subfields: subquery)
+			return self
+		}
+
+		/// An object with an ID field to support global identification, in accordance 
+		/// with the [Relay 
+		/// specification](https://relay.dev/graphql/objectidentification.htm#sec-Node-Interface). 
+		/// This interface is used by the 
+		/// [node](https://shopify.dev/api/admin-graphql/unstable/queries/node) and 
+		/// [nodes](https://shopify.dev/api/admin-graphql/unstable/queries/nodes) 
+		/// queries. 
+		@discardableResult
 		open func onExternalVideo(subfields: (ExternalVideoQuery) -> Void) -> NodeQuery {
 			let subquery = ExternalVideoQuery()
 			subfields(subquery)
@@ -263,10 +278,40 @@ extension Storefront {
 		/// [nodes](https://shopify.dev/api/admin-graphql/unstable/queries/nodes) 
 		/// queries. 
 		@discardableResult
+		open func onMarket(subfields: (MarketQuery) -> Void) -> NodeQuery {
+			let subquery = MarketQuery()
+			subfields(subquery)
+			addInlineFragment(on: "Market", subfields: subquery)
+			return self
+		}
+
+		/// An object with an ID field to support global identification, in accordance 
+		/// with the [Relay 
+		/// specification](https://relay.dev/graphql/objectidentification.htm#sec-Node-Interface). 
+		/// This interface is used by the 
+		/// [node](https://shopify.dev/api/admin-graphql/unstable/queries/node) and 
+		/// [nodes](https://shopify.dev/api/admin-graphql/unstable/queries/nodes) 
+		/// queries. 
+		@discardableResult
 		open func onMediaImage(subfields: (MediaImageQuery) -> Void) -> NodeQuery {
 			let subquery = MediaImageQuery()
 			subfields(subquery)
 			addInlineFragment(on: "MediaImage", subfields: subquery)
+			return self
+		}
+
+		/// An object with an ID field to support global identification, in accordance 
+		/// with the [Relay 
+		/// specification](https://relay.dev/graphql/objectidentification.htm#sec-Node-Interface). 
+		/// This interface is used by the 
+		/// [node](https://shopify.dev/api/admin-graphql/unstable/queries/node) and 
+		/// [nodes](https://shopify.dev/api/admin-graphql/unstable/queries/nodes) 
+		/// queries. 
+		@discardableResult
+		open func onMediaPresentation(subfields: (MediaPresentationQuery) -> Void) -> NodeQuery {
+			let subquery = MediaPresentationQuery()
+			subfields(subquery)
+			addInlineFragment(on: "MediaPresentation", subfields: subquery)
 			return self
 		}
 
@@ -312,6 +357,21 @@ extension Storefront {
 			let subquery = MetafieldQuery()
 			subfields(subquery)
 			addInlineFragment(on: "Metafield", subfields: subquery)
+			return self
+		}
+
+		/// An object with an ID field to support global identification, in accordance 
+		/// with the [Relay 
+		/// specification](https://relay.dev/graphql/objectidentification.htm#sec-Node-Interface). 
+		/// This interface is used by the 
+		/// [node](https://shopify.dev/api/admin-graphql/unstable/queries/node) and 
+		/// [nodes](https://shopify.dev/api/admin-graphql/unstable/queries/nodes) 
+		/// queries. 
+		@discardableResult
+		open func onMetaobject(subfields: (MetaobjectQuery) -> Void) -> NodeQuery {
+			let subquery = MetaobjectQuery()
+			subfields(subquery)
+			addInlineFragment(on: "Metaobject", subfields: subquery)
 			return self
 		}
 
@@ -528,6 +588,8 @@ extension Storefront {
 
 				case "Comment": return try Comment.init(fields: fields)
 
+				case "ComponentizableCartLine": return try ComponentizableCartLine.init(fields: fields)
+
 				case "ExternalVideo": return try ExternalVideo.init(fields: fields)
 
 				case "GenericFile": return try GenericFile.init(fields: fields)
@@ -536,13 +598,19 @@ extension Storefront {
 
 				case "MailingAddress": return try MailingAddress.init(fields: fields)
 
+				case "Market": return try Market.init(fields: fields)
+
 				case "MediaImage": return try MediaImage.init(fields: fields)
+
+				case "MediaPresentation": return try MediaPresentation.init(fields: fields)
 
 				case "Menu": return try Menu.init(fields: fields)
 
 				case "MenuItem": return try MenuItem.init(fields: fields)
 
 				case "Metafield": return try Metafield.init(fields: fields)
+
+				case "Metaobject": return try Metaobject.init(fields: fields)
 
 				case "Model3d": return try Model3d.init(fields: fields)
 
@@ -571,7 +639,7 @@ extension Storefront {
 			}
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		open var id: GraphQL.ID {
 			return internalGetId()
 		}

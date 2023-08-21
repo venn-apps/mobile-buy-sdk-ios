@@ -34,6 +34,16 @@ extension Storefront {
 	open class OrderQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = Order
 
+		/// The address associated with the payment method. 
+		@discardableResult
+		open func billingAddress(alias: String? = nil, _ subfields: (MailingAddressQuery) -> Void) -> OrderQuery {
+			let subquery = MailingAddressQuery()
+			subfields(subquery)
+
+			addField(field: "billingAddress", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
 		/// The reason for the order's cancellation. Returns `null` if the order wasn't 
 		/// canceled. 
 		@discardableResult
@@ -99,6 +109,16 @@ extension Storefront {
 			subfields(subquery)
 
 			addField(field: "currentTotalTax", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
+		/// A list of the custom attributes added to the order. 
+		@discardableResult
+		open func customAttributes(alias: String? = nil, _ subfields: (AttributeQuery) -> Void) -> OrderQuery {
+			let subquery = AttributeQuery()
+			subfields(subquery)
+
+			addField(field: "customAttributes", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
@@ -186,7 +206,7 @@ extension Storefront {
 			return self
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		@discardableResult
 		open func id(alias: String? = nil) -> OrderQuery {
 			addField(field: "id", aliasSuffix: alias)
@@ -499,6 +519,13 @@ extension Storefront {
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
+				case "billingAddress":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: Order.self, field: fieldName, value: fieldValue)
+				}
+				return try MailingAddress(fields: value)
+
 				case "cancelReason":
 				if value is NSNull { return nil }
 				guard let value = value as? String else {
@@ -543,6 +570,12 @@ extension Storefront {
 					throw SchemaViolationError(type: Order.self, field: fieldName, value: fieldValue)
 				}
 				return try MoneyV2(fields: value)
+
+				case "customAttributes":
+				guard let value = value as? [[String: Any]] else {
+					throw SchemaViolationError(type: Order.self, field: fieldName, value: fieldValue)
+				}
+				return try value.map { return try Attribute(fields: $0) }
 
 				case "customerLocale":
 				if value is NSNull { return nil }
@@ -752,6 +785,15 @@ extension Storefront {
 			}
 		}
 
+		/// The address associated with the payment method. 
+		open var billingAddress: Storefront.MailingAddress? {
+			return internalGetBillingAddress()
+		}
+
+		func internalGetBillingAddress(alias: String? = nil) -> Storefront.MailingAddress? {
+			return field(field: "billingAddress", aliasSuffix: alias) as! Storefront.MailingAddress?
+		}
+
 		/// The reason for the order's cancellation. Returns `null` if the order wasn't 
 		/// canceled. 
 		open var cancelReason: Storefront.OrderCancelReason? {
@@ -822,6 +864,15 @@ extension Storefront {
 			return field(field: "currentTotalTax", aliasSuffix: alias) as! Storefront.MoneyV2
 		}
 
+		/// A list of the custom attributes added to the order. 
+		open var customAttributes: [Storefront.Attribute] {
+			return internalGetCustomAttributes()
+		}
+
+		func internalGetCustomAttributes(alias: String? = nil) -> [Storefront.Attribute] {
+			return field(field: "customAttributes", aliasSuffix: alias) as! [Storefront.Attribute]
+		}
+
 		/// The locale code in which this specific order happened. 
 		open var customerLocale: String? {
 			return internalGetCustomerLocale()
@@ -889,7 +940,7 @@ extension Storefront {
 			return field(field: "fulfillmentStatus", aliasSuffix: alias) as! Storefront.OrderFulfillmentStatus
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		open var id: GraphQL.ID {
 			return internalGetId()
 		}
@@ -1138,6 +1189,12 @@ extension Storefront {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
 				switch($0) {
+					case "billingAddress":
+					if let value = internalGetBillingAddress() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
 					case "currentSubtotalPrice":
 					response.append(internalGetCurrentSubtotalPrice())
 					response.append(contentsOf: internalGetCurrentSubtotalPrice().childResponseObjectMap())
@@ -1155,6 +1212,12 @@ extension Storefront {
 					case "currentTotalTax":
 					response.append(internalGetCurrentTotalTax())
 					response.append(contentsOf: internalGetCurrentTotalTax().childResponseObjectMap())
+
+					case "customAttributes":
+					internalGetCustomAttributes().forEach {
+						response.append($0)
+						response.append(contentsOf: $0.childResponseObjectMap())
+					}
 
 					case "discountApplications":
 					response.append(internalGetDiscountApplications())

@@ -77,7 +77,7 @@ extension Storefront {
 			return self
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		@discardableResult
 		open func id(alias: String? = nil) -> ProductVariantQuery {
 			addField(field: "id", aliasSuffix: alias)
@@ -254,9 +254,10 @@ extension Storefront {
 		///     - last: Returns up to the last `n` elements from the list.
 		///     - before: Returns the elements that come before the specified cursor.
 		///     - reverse: Reverse the order of the underlying list.
+		///     - near: Used to sort results based on proximity to the provided location.
 		///
 		@discardableResult
-		open func storeAvailability(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, _ subfields: (StoreAvailabilityConnectionQuery) -> Void) -> ProductVariantQuery {
+		open func storeAvailability(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, near: GeoCoordinateInput? = nil, _ subfields: (StoreAvailabilityConnectionQuery) -> Void) -> ProductVariantQuery {
 			var args: [String] = []
 
 			if let first = first {
@@ -277,6 +278,10 @@ extension Storefront {
 
 			if let reverse = reverse {
 				args.append("reverse:\(reverse)")
+			}
+
+			if let near = near {
+				args.append("near:\(near.serialize())")
 			}
 
 			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
@@ -545,7 +550,7 @@ extension Storefront {
 			return field(field: "currentlyNotInStock", aliasSuffix: alias) as! Bool
 		}
 
-		/// A globally-unique identifier. 
+		/// A globally-unique ID. 
 		open var id: GraphQL.ID {
 			return internalGetId()
 		}
