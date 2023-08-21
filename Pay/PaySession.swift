@@ -28,6 +28,7 @@
 
 import Foundation
 import PassKit
+import UIKit
 
 /// The delegate will be called when user interaction modifies the information
 /// that affects checkout. Whenever such events occur, you should perform any
@@ -204,7 +205,7 @@ public class PaySession: NSObject {
 extension PaySession: PKPaymentAuthorizationControllerDelegate {
     
     @available(macCatalyst 14.0, *)
-    public func presentationWindow(for controller: PKPaymentAuthorizationController) -> NSWindow? {
+    public func presentationWindow(for controller: PKPaymentAuthorizationController) -> UIWindow? {
         return nil
     }
 
