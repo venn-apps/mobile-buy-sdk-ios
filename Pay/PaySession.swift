@@ -202,6 +202,10 @@ public class PaySession: NSObject {
 //
 @available(iOS 10.0, *)
 extension PaySession: PKPaymentAuthorizationControllerDelegate {
+    
+    public func presentationWindow(for controller: PKPaymentAuthorizationController) -> NSWindow? {
+        return nil
+    }
 
     // -------------------------------------------------------
     //  MARK: - PKPaymentAuthorizationControllerDelegate -
