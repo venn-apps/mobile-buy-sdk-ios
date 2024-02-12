@@ -65,7 +65,7 @@ extension Storefront {
 			return self
 		}
 
-		/// Information about the buyer that is interacting with the cart. 
+		/// Information about the buyer that's interacting with the cart. 
 		@discardableResult
 		open func buyerIdentity(alias: String? = nil, _ subfields: (CartBuyerIdentityQuery) -> Void) -> CartQuery {
 			let subquery = CartBuyerIdentityQuery()
@@ -234,18 +234,20 @@ extension Storefront {
 		/// Returns a metafield found by namespace and key. 
 		///
 		/// - parameters:
-		///     - namespace: A container for a set of metafields.
+		///     - namespace: The container the metafield belongs to. If omitted, the app-reserved namespace will be used.
 		///     - key: The identifier for the metafield.
 		///
 		@discardableResult
-		open func metafield(alias: String? = nil, namespace: String, key: String, _ subfields: (MetafieldQuery) -> Void) -> CartQuery {
+		open func metafield(alias: String? = nil, namespace: String? = nil, key: String, _ subfields: (MetafieldQuery) -> Void) -> CartQuery {
 			var args: [String] = []
-
-			args.append("namespace:\(GraphQL.quoteString(input: namespace))")
 
 			args.append("key:\(GraphQL.quoteString(input: key))")
 
-			let argsString = "(\(args.joined(separator: ",")))"
+			if let namespace = namespace {
+				args.append("namespace:\(GraphQL.quoteString(input: namespace))")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
 
 			let subquery = MetafieldQuery()
 			subfields(subquery)
@@ -259,6 +261,8 @@ extension Storefront {
 		///
 		/// - parameters:
 		///     - identifiers: The list of metafields to retrieve by namespace and key.
+		///        
+		///        The input must not contain more than `250` values.
 		///
 		@discardableResult
 		open func metafields(alias: String? = nil, identifiers: [HasMetafieldsIdentifier], _ subfields: (MetafieldQuery) -> Void) -> CartQuery {
@@ -275,7 +279,7 @@ extension Storefront {
 			return self
 		}
 
-		/// A note that is associated with the cart. For example, the note can be a 
+		/// A note that's associated with the cart. For example, the note can be a 
 		/// personalized message to the buyer. 
 		@discardableResult
 		open func note(alias: String? = nil) -> CartQuery {
@@ -445,7 +449,7 @@ extension Storefront {
 			return field(field: "attributes", aliasSuffix: alias) as! [Storefront.Attribute]
 		}
 
-		/// Information about the buyer that is interacting with the cart. 
+		/// Information about the buyer that's interacting with the cart. 
 		open var buyerIdentity: Storefront.CartBuyerIdentity {
 			return internalGetBuyerIdentity()
 		}
@@ -581,7 +585,7 @@ extension Storefront {
 			return field(field: "metafields", aliasSuffix: alias) as! [Storefront.Metafield?]
 		}
 
-		/// A note that is associated with the cart. For example, the note can be a 
+		/// A note that's associated with the cart. For example, the note can be a 
 		/// personalized message to the buyer. 
 		open var note: String? {
 			return internalGetNote()
