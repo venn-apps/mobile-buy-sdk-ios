@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-# Generates new schema typed swift code for the ios mobile buy SDK; and updates the
+# Generates new schema typed swift code for the ios MobileBuySDK; and updates the
 # version of the storefront API being used by the SDK
 #
 # build.rb

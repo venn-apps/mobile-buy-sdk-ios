@@ -1,4 +1,4 @@
-﻿![Mobile Buy SDK](https://cloud.githubusercontent.com/assets/5244861/26374751/6895a582-3fd4-11e7-80c4-2c1632262d66.png)
+﻿![MobileBuySDK](https://cloud.githubusercontent.com/assets/5244861/26374751/6895a582-3fd4-11e7-80c4-2c1632262d66.png)
 
 [![Tests](https://github.com/Shopify/mobile-buy-sdk-ios/workflows/Test/badge.svg)](https://github.com/Shopify/mobile-buy-sdk-ios/actions/workflows/test.yml)
 [![GitHub Release](https://img.shields.io/github/release/shopify/mobile-buy-sdk-ios.svg?style=flat)](https://github.com/Shopify/mobile-buy-sdk-ios/releases/latest)
@@ -6,9 +6,9 @@
 [![Swift Package Manager compatible](https://img.shields.io/badge/Swift%20Package%20Manager-compatible-4BC51D.svg?style=flat)](https://swift.org/package-manager/)
 [![GitHub license](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](https://github.com/Shopify/mobile-buy-sdk-ios/blob/main/LICENSE)
 
-# Mobile Buy SDK
+# MobileBuySDK
 
-The Mobile Buy SDK makes it easy to create custom storefronts in your mobile app. The SDK connects to the Shopify platform using the Storefront GraphQL API and supports a wide range of native storefront experiences.
+The MobileBuySDK makes it easy to create custom storefronts in your mobile app. The SDK connects to the Shopify platform using the Storefront GraphQL API and supports a wide range of native storefront experiences.
 
 ### Documentation
 
@@ -94,7 +94,7 @@ You don't need to be an expert in GraphQL to start using it with the Buy SDK (bu
 
 ## Migration from SDK v2.0
 
-The previous version of the Mobile Buy SDK (version 2.0) is based on a REST API. With version 3.0, Shopify is migrating the SDK from REST to GraphQL.
+The previous version of the MobileBuySDK (version 2.0) is based on a REST API. With version 3.0, Shopify is migrating the SDK from REST to GraphQL.
 
 Unfortunately, the specifics of generation GraphQL models make it almost impossible to create a migration path from v2.0 to v3.0 (domains models are not backwards compatible). However, the main concepts are the same across the two versions, such as collections, products, checkouts, and orders.
 
@@ -767,8 +767,8 @@ We welcome contributions. Please follow the steps in our [contributing guideline
 
 ## Help
 
-For help with the Mobile Buy SDK, see the [iOS Buy SDK documentation](https://help.shopify.com/en/api/storefront-api/tools/ios-buy-sdk) or post questions on [our forum](https://ecommerce.shopify.com/c/shopify-apis-and-technology), in the `Shopify APIs & SDKs` section.
+For help with the MobileBuySDK, see the [iOS Buy SDK documentation](https://help.shopify.com/en/api/storefront-api/tools/ios-buy-sdk) or post questions on [our forum](https://ecommerce.shopify.com/c/shopify-apis-and-technology), in the `Shopify APIs & SDKs` section.
 
 ## License
 
-The Mobile Buy SDK is provided under an [MIT License](LICENSE).
+The MobileBuySDK is provided under an [MIT License](LICENSE).

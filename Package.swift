@@ -4,7 +4,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "Mobile Buy SDK",
+    name: "MobileBuySDK",
     platforms: [
         .iOS(.v12),
         .watchOS(.v2),

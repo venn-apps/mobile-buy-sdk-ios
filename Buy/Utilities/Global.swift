@@ -32,7 +32,7 @@ class Global {
     //  MARK: - User Agent -
     //
     static var userAgent: String {
-        return "Mobile Buy SDK iOS/\(self.frameworkVersion)/\(self.applicationIdentifier)"
+        return "MobileBuySDK iOS/\(self.frameworkVersion)/\(self.applicationIdentifier)"
     }
 
     // ----------------------------------
