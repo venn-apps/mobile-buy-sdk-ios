@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -159,6 +159,15 @@ extension Storefront {
 
 		/// A resource that the metafield belongs to. 
 		@discardableResult
+		open func onSellingPlan(subfields: (SellingPlanQuery) -> Void) -> MetafieldParentResourceQuery {
+			let subquery = SellingPlanQuery()
+			subfields(subquery)
+			addInlineFragment(on: "SellingPlan", subfields: subquery)
+			return self
+		}
+
+		/// A resource that the metafield belongs to. 
+		@discardableResult
 		open func onShop(subfields: (ShopQuery) -> Void) -> MetafieldParentResourceQuery {
 			let subquery = ShopQuery()
 			subfields(subquery)
@@ -210,6 +219,8 @@ extension Storefront {
 
 				case "ProductVariant": return try ProductVariant.init(fields: fields)
 
+				case "SellingPlan": return try SellingPlan.init(fields: fields)
+
 				case "Shop": return try Shop.init(fields: fields)
 
 				default:
@@ -217,7 +228,7 @@ extension Storefront {
 			}
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			return []
 		}
 	}

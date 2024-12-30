@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
@@ -36,9 +36,6 @@ jobs:
 
       - name: Test Buy Watch
         run: ./Scripts/test_buy_watch
-
-      - name: Test Pay
-        run: ./Scripts/test_pay
 
       - name: Test Swift Package
         run: swift test 2>&1 | xcpretty

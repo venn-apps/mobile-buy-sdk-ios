@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ extension Storefront {
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
 		/// on sale, when `compareAtPriceV2` is higher than `priceV2`. 
-		@available(*, deprecated, message:"Use `compareAtPrice` instead.")
+		@available(*, deprecated, message: "Use `compareAtPrice` instead.")
 		@discardableResult
 		open func compareAtPriceV2(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> ProductVariantQuery {
 			let subquery = MoneyV2Query()
@@ -69,11 +69,86 @@ extension Storefront {
 			return self
 		}
 
+		/// List of bundles components included in the variant considering only fixed 
+		/// bundles. 
+		///
+		/// - parameters:
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///
+		@discardableResult
+		open func components(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, _ subfields: (ProductVariantComponentConnectionQuery) -> Void) -> ProductVariantQuery {
+			var args: [String] = []
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = ProductVariantComponentConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "components", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
 		/// Whether a product is out of stock but still available for purchase (used 
 		/// for backorders). 
 		@discardableResult
 		open func currentlyNotInStock(alias: String? = nil) -> ProductVariantQuery {
 			addField(field: "currentlyNotInStock", aliasSuffix: alias)
+			return self
+		}
+
+		/// List of bundles that include this variant considering only fixed bundles. 
+		///
+		/// - parameters:
+		///     - first: Returns up to the first `n` elements from the list.
+		///     - after: Returns the elements that come after the specified cursor.
+		///     - last: Returns up to the last `n` elements from the list.
+		///     - before: Returns the elements that come before the specified cursor.
+		///
+		@discardableResult
+		open func groupedBy(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, _ subfields: (ProductVariantConnectionQuery) -> Void) -> ProductVariantQuery {
+			var args: [String] = []
+
+			if let first = first {
+				args.append("first:\(first)")
+			}
+
+			if let after = after {
+				args.append("after:\(GraphQL.quoteString(input: after))")
+			}
+
+			if let last = last {
+				args.append("last:\(last)")
+			}
+
+			if let before = before {
+				args.append("before:\(GraphQL.quoteString(input: before))")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = ProductVariantConnectionQuery()
+			subfields(subquery)
+
+			addField(field: "groupedBy", aliasSuffix: alias, args: argsString, subfields: subquery)
 			return self
 		}
 
@@ -95,7 +170,9 @@ extension Storefront {
 			return self
 		}
 
-		/// Returns a metafield found by namespace and key. 
+		/// A [custom field](https://shopify.dev/docs/apps/build/custom-data), 
+		/// including its `namespace` and `key`, that's associated with a Shopify 
+		/// resource for the purposes of adding and storing additional information. 
 		///
 		/// - parameters:
 		///     - namespace: The container the metafield belongs to. If omitted, the app-reserved namespace will be used.
@@ -120,8 +197,8 @@ extension Storefront {
 			return self
 		}
 
-		/// The metafields associated with the resource matching the supplied list of 
-		/// namespaces and keys. 
+		/// A list of [custom fields](/docs/apps/build/custom-data) that a merchant 
+		/// associates with a Shopify resource. 
 		///
 		/// - parameters:
 		///     - identifiers: The list of metafields to retrieve by namespace and key.
@@ -132,7 +209,7 @@ extension Storefront {
 		open func metafields(alias: String? = nil, identifiers: [HasMetafieldsIdentifier], _ subfields: (MetafieldQuery) -> Void) -> ProductVariantQuery {
 			var args: [String] = []
 
-			args.append("identifiers:[\(identifiers.map{ "\($0.serialize())" }.joined(separator: ","))]")
+			args.append("identifiers:[\(identifiers.map { "\($0.serialize())" }.joined(separator: ","))]")
 
 			let argsString = "(\(args.joined(separator: ",")))"
 
@@ -154,7 +231,7 @@ extension Storefront {
 		}
 
 		/// The product variant’s price. 
-		@available(*, deprecated, message:"Use `price` instead.")
+		@available(*, deprecated, message: "Use `price` instead.")
 		@discardableResult
 		open func priceV2(alias: String? = nil, _ subfields: (MoneyV2Query) -> Void) -> ProductVariantQuery {
 			let subquery = MoneyV2Query()
@@ -228,6 +305,15 @@ extension Storefront {
 			return self
 		}
 
+		/// Whether a product variant requires components. The default value is 
+		/// `false`. If `true`, then the product variant can only be purchased as a 
+		/// parent bundle with components. 
+		@discardableResult
+		open func requiresComponents(alias: String? = nil) -> ProductVariantQuery {
+			addField(field: "requiresComponents", aliasSuffix: alias)
+			return self
+		}
+
 		/// Whether a customer needs to provide a shipping address when placing an 
 		/// order for the product variant. 
 		@discardableResult
@@ -287,6 +373,16 @@ extension Storefront {
 			subfields(subquery)
 
 			addField(field: "sellingPlanAllocations", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
+		/// The Shop Pay Installments pricing information for the product variant. 
+		@discardableResult
+		open func shopPayInstallmentsPricing(alias: String? = nil, _ subfields: (ShopPayInstallmentsProductVariantPricingQuery) -> Void) -> ProductVariantQuery {
+			let subquery = ShopPayInstallmentsProductVariantPricingQuery()
+			subfields(subquery)
+
+			addField(field: "shopPayInstallmentsPricing", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
 
@@ -429,11 +525,23 @@ extension Storefront {
 				}
 				return try MoneyV2(fields: value)
 
+				case "components":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try ProductVariantComponentConnection(fields: value)
+
 				case "currentlyNotInStock":
 				guard let value = value as? Bool else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
 				return value
+
+				case "groupedBy":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try ProductVariantConnection(fields: value)
 
 				case "id":
 				guard let value = value as? String else {
@@ -502,6 +610,12 @@ extension Storefront {
 				}
 				return try QuantityRule(fields: value)
 
+				case "requiresComponents":
+				guard let value = value as? Bool else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return value
+
 				case "requiresShipping":
 				guard let value = value as? Bool else {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
@@ -519,6 +633,13 @@ extension Storefront {
 					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
 				}
 				return try SellingPlanAllocationConnection(fields: value)
+
+				case "shopPayInstallmentsPricing":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: ProductVariant.self, field: fieldName, value: fieldValue)
+				}
+				return try ShopPayInstallmentsProductVariantPricing(fields: value)
 
 				case "sku":
 				if value is NSNull { return nil }
@@ -607,13 +728,27 @@ extension Storefront {
 
 		/// The compare at price of the variant. This can be used to mark a variant as 
 		/// on sale, when `compareAtPriceV2` is higher than `priceV2`. 
-		@available(*, deprecated, message:"Use `compareAtPrice` instead.")
+		@available(*, deprecated, message: "Use `compareAtPrice` instead.")
 		open var compareAtPriceV2: Storefront.MoneyV2? {
 			return internalGetCompareAtPriceV2()
 		}
 
 		func internalGetCompareAtPriceV2(alias: String? = nil) -> Storefront.MoneyV2? {
 			return field(field: "compareAtPriceV2", aliasSuffix: alias) as! Storefront.MoneyV2?
+		}
+
+		/// List of bundles components included in the variant considering only fixed 
+		/// bundles. 
+		open var components: Storefront.ProductVariantComponentConnection {
+			return internalGetComponents()
+		}
+
+		open func aliasedComponents(alias: String) -> Storefront.ProductVariantComponentConnection {
+			return internalGetComponents(alias: alias)
+		}
+
+		func internalGetComponents(alias: String? = nil) -> Storefront.ProductVariantComponentConnection {
+			return field(field: "components", aliasSuffix: alias) as! Storefront.ProductVariantComponentConnection
 		}
 
 		/// Whether a product is out of stock but still available for purchase (used 
@@ -624,6 +759,19 @@ extension Storefront {
 
 		func internalGetCurrentlyNotInStock(alias: String? = nil) -> Bool {
 			return field(field: "currentlyNotInStock", aliasSuffix: alias) as! Bool
+		}
+
+		/// List of bundles that include this variant considering only fixed bundles. 
+		open var groupedBy: Storefront.ProductVariantConnection {
+			return internalGetGroupedBy()
+		}
+
+		open func aliasedGroupedBy(alias: String) -> Storefront.ProductVariantConnection {
+			return internalGetGroupedBy(alias: alias)
+		}
+
+		func internalGetGroupedBy(alias: String? = nil) -> Storefront.ProductVariantConnection {
+			return field(field: "groupedBy", aliasSuffix: alias) as! Storefront.ProductVariantConnection
 		}
 
 		/// A globally-unique ID. 
@@ -645,7 +793,9 @@ extension Storefront {
 			return field(field: "image", aliasSuffix: alias) as! Storefront.Image?
 		}
 
-		/// Returns a metafield found by namespace and key. 
+		/// A [custom field](https://shopify.dev/docs/apps/build/custom-data), 
+		/// including its `namespace` and `key`, that's associated with a Shopify 
+		/// resource for the purposes of adding and storing additional information. 
 		open var metafield: Storefront.Metafield? {
 			return internalGetMetafield()
 		}
@@ -658,8 +808,8 @@ extension Storefront {
 			return field(field: "metafield", aliasSuffix: alias) as! Storefront.Metafield?
 		}
 
-		/// The metafields associated with the resource matching the supplied list of 
-		/// namespaces and keys. 
+		/// A list of [custom fields](/docs/apps/build/custom-data) that a merchant 
+		/// associates with a Shopify resource. 
 		open var metafields: [Storefront.Metafield?] {
 			return internalGetMetafields()
 		}
@@ -682,7 +832,7 @@ extension Storefront {
 		}
 
 		/// The product variant’s price. 
-		@available(*, deprecated, message:"Use `price` instead.")
+		@available(*, deprecated, message: "Use `price` instead.")
 		open var priceV2: Storefront.MoneyV2 {
 			return internalGetPriceV2()
 		}
@@ -731,6 +881,17 @@ extension Storefront {
 			return field(field: "quantityRule", aliasSuffix: alias) as! Storefront.QuantityRule
 		}
 
+		/// Whether a product variant requires components. The default value is 
+		/// `false`. If `true`, then the product variant can only be purchased as a 
+		/// parent bundle with components. 
+		open var requiresComponents: Bool {
+			return internalGetRequiresComponents()
+		}
+
+		func internalGetRequiresComponents(alias: String? = nil) -> Bool {
+			return field(field: "requiresComponents", aliasSuffix: alias) as! Bool
+		}
+
 		/// Whether a customer needs to provide a shipping address when placing an 
 		/// order for the product variant. 
 		open var requiresShipping: Bool {
@@ -763,6 +924,15 @@ extension Storefront {
 
 		func internalGetSellingPlanAllocations(alias: String? = nil) -> Storefront.SellingPlanAllocationConnection {
 			return field(field: "sellingPlanAllocations", aliasSuffix: alias) as! Storefront.SellingPlanAllocationConnection
+		}
+
+		/// The Shop Pay Installments pricing information for the product variant. 
+		open var shopPayInstallmentsPricing: Storefront.ShopPayInstallmentsProductVariantPricing? {
+			return internalGetShopPayInstallmentsPricing()
+		}
+
+		func internalGetShopPayInstallmentsPricing(alias: String? = nil) -> Storefront.ShopPayInstallmentsProductVariantPricing? {
+			return field(field: "shopPayInstallmentsPricing", aliasSuffix: alias) as! Storefront.ShopPayInstallmentsProductVariantPricing?
 		}
 
 		/// The SKU (stock keeping unit) associated with the variant. 
@@ -842,10 +1012,10 @@ extension Storefront {
 			return field(field: "weightUnit", aliasSuffix: alias) as! Storefront.WeightUnit
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
 					case "compareAtPrice":
 					if let value = internalGetCompareAtPrice() {
 						response.append(value)
@@ -857,6 +1027,14 @@ extension Storefront {
 						response.append(value)
 						response.append(contentsOf: value.childResponseObjectMap())
 					}
+
+					case "components":
+					response.append(internalGetComponents())
+					response.append(contentsOf: internalGetComponents().childResponseObjectMap())
+
+					case "groupedBy":
+					response.append(internalGetGroupedBy())
+					response.append(contentsOf: internalGetGroupedBy().childResponseObjectMap())
 
 					case "image":
 					if let value = internalGetImage() {
@@ -907,6 +1085,12 @@ extension Storefront {
 					case "sellingPlanAllocations":
 					response.append(internalGetSellingPlanAllocations())
 					response.append(contentsOf: internalGetSellingPlanAllocations().childResponseObjectMap())
+
+					case "shopPayInstallmentsPricing":
+					if let value = internalGetShopPayInstallmentsPricing() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
 
 					case "storeAvailability":
 					response.append(internalGetStoreAvailability())

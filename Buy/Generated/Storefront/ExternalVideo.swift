@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -46,7 +46,7 @@ extension Storefront {
 		}
 
 		/// The URL. 
-		@available(*, deprecated, message:"Use `originUrl` instead.")
+		@available(*, deprecated, message: "Use `originUrl` instead.")
 		@discardableResult
 		open func embeddedUrl(alias: String? = nil) -> ExternalVideoQuery {
 			addField(field: "embeddedUrl", aliasSuffix: alias)
@@ -190,7 +190,7 @@ extension Storefront {
 		}
 
 		/// The URL. 
-		@available(*, deprecated, message:"Use `originUrl` instead.")
+		@available(*, deprecated, message: "Use `originUrl` instead.")
 		open var embeddedUrl: URL {
 			return internalGetEmbeddedUrl()
 		}
@@ -253,10 +253,10 @@ extension Storefront {
 			return field(field: "previewImage", aliasSuffix: alias) as! Storefront.Image?
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
 					case "presentation":
 					if let value = internalGetPresentation() {
 						response.append(value)

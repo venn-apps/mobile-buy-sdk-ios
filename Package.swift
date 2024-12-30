@@ -15,11 +15,7 @@ let package = Package(
         .library(
             name: "Buy",
             targets: ["Buy"]
-        ),
-        .library(
-            name: "Pay",
-            targets: ["Pay"]
-        ),
+        )
     ],
     dependencies: [],
     targets: [
@@ -29,23 +25,11 @@ let package = Package(
             path: "Buy",
             exclude: ["Info.plist"]
         ),
-        .target(
-            name: "Pay",
-            dependencies: [],
-            path: "Pay",
-            exclude: ["Info.plist"]
-        ),
         .testTarget(
             name: "BuyTests",
             dependencies: ["Buy"],
             path: "BuyTests",
             exclude: ["Info.plist"]
-        ),
-        .testTarget(
-            name: "PayTests",
-            dependencies: ["Pay"],
-            path: "PayTests",
-            exclude: ["Info.plist"]
-        ),
+        )
     ]
 )

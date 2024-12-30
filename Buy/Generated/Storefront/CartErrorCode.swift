@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +97,9 @@ extension Storefront {
 
 		/// Missing note. 
 		case missingNote = "MISSING_NOTE"
+
+		/// The note length must be below the specified maximum. 
+		case noteTooLong = "NOTE_TOO_LONG"
 
 		/// The payment method is not supported. 
 		case paymentMethodNotSupported = "PAYMENT_METHOD_NOT_SUPPORTED"

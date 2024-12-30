@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -120,19 +120,19 @@ extension Storefront {
 		/// Fetch a specific `Blog` by one of its unique attributes. 
 		///
 		/// - parameters:
-		///     - id: The ID of the `Blog`.
 		///     - handle: The handle of the `Blog`.
+		///     - id: The ID of the `Blog`.
 		///
 		@discardableResult
-		open func blog(alias: String? = nil, id: GraphQL.ID? = nil, handle: String? = nil, _ subfields: (BlogQuery) -> Void) -> QueryRootQuery {
+		open func blog(alias: String? = nil, handle: String? = nil, id: GraphQL.ID? = nil, _ subfields: (BlogQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
-
-			if let id = id {
-				args.append("id:\(GraphQL.quoteString(input: "\(id.rawValue)"))")
-			}
 
 			if let handle = handle {
 				args.append("handle:\(GraphQL.quoteString(input: handle))")
+			}
+
+			if let id = id {
+				args.append("id:\(GraphQL.quoteString(input: "\(id.rawValue)"))")
 			}
 
 			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
@@ -149,7 +149,7 @@ extension Storefront {
 		/// - parameters:
 		///     - handle: The handle of the blog.
 		///
-		@available(*, deprecated, message:"Use `blog` instead.")
+		@available(*, deprecated, message: "Use `blog` instead.")
 		@discardableResult
 		open func blogByHandle(alias: String? = nil, handle: String, _ subfields: (BlogQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -298,7 +298,7 @@ extension Storefront {
 		/// - parameters:
 		///     - handle: The handle of the collection.
 		///
-		@available(*, deprecated, message:"Use `collection` instead.")
+		@available(*, deprecated, message: "Use `collection` instead.")
 		@discardableResult
 		open func collectionByHandle(alias: String? = nil, handle: String, _ subfields: (CollectionQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -587,7 +587,7 @@ extension Storefront {
 		open func nodes(alias: String? = nil, ids: [GraphQL.ID], _ subfields: (NodeQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
 
-			args.append("ids:[\(ids.map{ "\(GraphQL.quoteString(input: "\($0.rawValue)"))" }.joined(separator: ","))]")
+			args.append("ids:[\(ids.map { "\(GraphQL.quoteString(input: "\($0.rawValue)"))" }.joined(separator: ","))]")
 
 			let argsString = "(\(args.joined(separator: ",")))"
 
@@ -601,19 +601,19 @@ extension Storefront {
 		/// Fetch a specific `Page` by one of its unique attributes. 
 		///
 		/// - parameters:
-		///     - id: The ID of the `Page`.
 		///     - handle: The handle of the `Page`.
+		///     - id: The ID of the `Page`.
 		///
 		@discardableResult
-		open func page(alias: String? = nil, id: GraphQL.ID? = nil, handle: String? = nil, _ subfields: (PageQuery) -> Void) -> QueryRootQuery {
+		open func page(alias: String? = nil, handle: String? = nil, id: GraphQL.ID? = nil, _ subfields: (PageQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
-
-			if let id = id {
-				args.append("id:\(GraphQL.quoteString(input: "\(id.rawValue)"))")
-			}
 
 			if let handle = handle {
 				args.append("handle:\(GraphQL.quoteString(input: handle))")
+			}
+
+			if let id = id {
+				args.append("id:\(GraphQL.quoteString(input: "\(id.rawValue)"))")
 			}
 
 			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
@@ -630,7 +630,7 @@ extension Storefront {
 		/// - parameters:
 		///     - handle: The handle of the page.
 		///
-		@available(*, deprecated, message:"Use `page` instead.")
+		@available(*, deprecated, message: "Use `page` instead.")
 		@discardableResult
 		open func pageByHandle(alias: String? = nil, handle: String, _ subfields: (PageQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -705,6 +705,16 @@ extension Storefront {
 			return self
 		}
 
+		/// Settings related to payments. 
+		@discardableResult
+		open func paymentSettings(alias: String? = nil, _ subfields: (PaymentSettingsQuery) -> Void) -> QueryRootQuery {
+			let subquery = PaymentSettingsQuery()
+			subfields(subquery)
+
+			addField(field: "paymentSettings", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
 		/// List of the predictive search results. 
 		///
 		/// - parameters:
@@ -734,11 +744,11 @@ extension Storefront {
 			}
 
 			if let searchableFields = searchableFields {
-				args.append("searchableFields:[\(searchableFields.map{ "\($0.rawValue)" }.joined(separator: ","))]")
+				args.append("searchableFields:[\(searchableFields.map { "\($0.rawValue)" }.joined(separator: ","))]")
 			}
 
 			if let types = types {
-				args.append("types:[\(types.map{ "\($0.rawValue)" }.joined(separator: ","))]")
+				args.append("types:[\(types.map { "\($0.rawValue)" }.joined(separator: ","))]")
 			}
 
 			if let unavailableProducts = unavailableProducts {
@@ -784,17 +794,11 @@ extension Storefront {
 		/// Find a product by its handle. 
 		///
 		/// - parameters:
-		///     - handle: A unique string that identifies the product. Handles are automatically
-		///        generated based on the product's title, and are always lowercase. Whitespace
-		///        and special characters are replaced with a hyphen: `-`. If there are
-		///        multiple consecutive whitespace or special characters, then they're replaced
-		///        with a single hyphen. Whitespace or special characters at the beginning are
-		///        removed. If a duplicate product title is used, then the handle is
-		///        auto-incremented by one. For example, if you had two products called
-		///        `Potion`, then their handles would be `potion` and `potion-1`. After a
-		///        product has been created, changing the product title doesn't update the handle.
+		///     - handle: A unique, human-readable string of the product's title.
+		///        A handle can contain letters, hyphens (`-`), and numbers, but no spaces.
+		///        The handle is used in the online store URL for the product.
 		///
-		@available(*, deprecated, message:"Use `product` instead.")
+		@available(*, deprecated, message: "Use `product` instead.")
 		@discardableResult
 		open func productByHandle(alias: String? = nil, handle: String, _ subfields: (ProductQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
@@ -817,13 +821,20 @@ extension Storefront {
 		///
 		/// - parameters:
 		///     - productId: The id of the product.
+		///     - productHandle: The handle of the product.
 		///     - intent: The recommendation intent that is used to generate product recommendations. You can use intent to generate product recommendations on various pages across the channels, according to different strategies.
 		///
 		@discardableResult
-		open func productRecommendations(alias: String? = nil, productId: GraphQL.ID, intent: ProductRecommendationIntent? = nil, _ subfields: (ProductQuery) -> Void) -> QueryRootQuery {
+		open func productRecommendations(alias: String? = nil, productId: GraphQL.ID? = nil, productHandle: String? = nil, intent: ProductRecommendationIntent? = nil, _ subfields: (ProductQuery) -> Void) -> QueryRootQuery {
 			var args: [String] = []
 
-			args.append("productId:\(GraphQL.quoteString(input: "\(productId.rawValue)"))")
+			if let productId = productId {
+				args.append("productId:\(GraphQL.quoteString(input: "\(productId.rawValue)"))")
+			}
+
+			if let productHandle = productHandle {
+				args.append("productHandle:\(GraphQL.quoteString(input: productHandle))")
+			}
 
 			if let intent = intent {
 				args.append("intent:\(intent.rawValue)")
@@ -880,8 +891,9 @@ extension Storefront {
 			return self
 		}
 
-		/// List of the shop’s products. For storefront search, use [`search` 
-		/// query](https://shopify.dev/docs/api/storefront/latest/queries/search). 
+		/// Returns a list of the shop's products. For storefront search, use the 
+		/// [`search`](https://shopify.dev/docs/api/storefront/latest/queries/search) 
+		/// query. 
 		///
 		/// - parameters:
 		///     - first: Returns up to the first `n` elements from the list.
@@ -890,19 +902,19 @@ extension Storefront {
 		///     - before: Returns the elements that come before the specified cursor.
 		///     - reverse: Reverse the order of the underlying list.
 		///     - sortKey: Sort the underlying list by the given key.
-		///     - query: Apply one or multiple filters to the query.
+		///     - query: You can apply one or multiple filters to a query.
 		///        | name | description | acceptable_values | default_value | example_use |
 		///        | ---- | ---- | ---- | ---- | ---- |
-		///        | available_for_sale |
-		///        | created_at |
-		///        | product_type |
-		///        | tag |
-		///        | tag_not |
-		///        | title |
-		///        | updated_at |
-		///        | variants.price |
-		///        | vendor |
-		///        Refer to the detailed [search syntax](https://shopify.dev/api/usage/search-syntax) for more information about using filters.
+		///        | available_for_sale | Filter by products that have at least one product variant available for sale. |
+		///        | created_at | Filter by the date and time when the product was created. | | | - `created_at:>'2020-10-21T23:39:20Z'`<br/> - `created_at:<now`<br/> - `created_at:<=2024` |
+		///        | product_type | Filter by a comma-separated list of [product types](https://help.shopify.com/en/manual/products/details/product-type). | | | `product_type:snowboard` |
+		///        | tag | Filter products by the product [`tags`](https://shopify.dev/docs/api/storefront/latest/objects/Product#field-tags) field. | | | `tag:my_tag` |
+		///        | tag_not | Filter by products that don't have the specified product [tags](https://shopify.dev/docs/api/storefront/latest/objects/Product#field-tags). | | | `tag_not:my_tag` |
+		///        | title | Filter by the product [`title`](https://shopify.dev/docs/api/storefront/latest/objects/Product#field-title) field. | | | `title:The Minimal Snowboard` |
+		///        | updated_at | Filter by the date and time when the product was last updated. | | | - `updated_at:>'2020-10-21T23:39:20Z'`<br/> - `updated_at:<now`<br/> - `updated_at:<=2024` |
+		///        | variants.price | Filter by the price of the product's variants. |
+		///        | vendor | Filter by the product [`vendor`](https://shopify.dev/docs/api/storefront/latest/objects/Product#field-vendor) field. | | | - `vendor:Snowdevil`<br/> - `vendor:Snowdevil OR vendor:Icedevil` |
+		///        Learn more about [Shopify API search syntax](https://shopify.dev/api/usage/search-syntax).
 		///
 		@discardableResult
 		open func products(alias: String? = nil, first: Int32? = nil, after: String? = nil, last: Int32? = nil, before: String? = nil, reverse: Bool? = nil, sortKey: ProductSortKeys? = nil, query: String? = nil, _ subfields: (ProductConnectionQuery) -> Void) -> QueryRootQuery {
@@ -1010,11 +1022,11 @@ extension Storefront {
 			}
 
 			if let productFilters = productFilters {
-				args.append("productFilters:[\(productFilters.map{ "\($0.serialize())" }.joined(separator: ","))]")
+				args.append("productFilters:[\(productFilters.map { "\($0.serialize())" }.joined(separator: ","))]")
 			}
 
 			if let types = types {
-				args.append("types:[\(types.map{ "\($0.rawValue)" }.joined(separator: ","))]")
+				args.append("types:[\(types.map { "\($0.rawValue)" }.joined(separator: ","))]")
 			}
 
 			if let unavailableProducts = unavailableProducts {
@@ -1037,6 +1049,26 @@ extension Storefront {
 			subfields(subquery)
 
 			addField(field: "shop", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
+		/// Contains all fields required to generate sitemaps. 
+		///
+		/// - parameters:
+		///     - type: The type of the resource for the sitemap.
+		///
+		@discardableResult
+		open func sitemap(alias: String? = nil, type: SitemapType, _ subfields: (SitemapQuery) -> Void) -> QueryRootQuery {
+			var args: [String] = []
+
+			args.append("type:\(type.rawValue)")
+
+			let argsString = "(\(args.joined(separator: ",")))"
+
+			let subquery = SitemapQuery()
+			subfields(subquery)
+
+			addField(field: "sitemap", aliasSuffix: alias, args: argsString, subfields: subquery)
 			return self
 		}
 
@@ -1245,6 +1277,12 @@ extension Storefront {
 				}
 				return try PageConnection(fields: value)
 
+				case "paymentSettings":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try PaymentSettings(fields: value)
+
 				case "predictiveSearch":
 				if value is NSNull { return nil }
 				guard let value = value as? [String: Any] else {
@@ -1309,6 +1347,12 @@ extension Storefront {
 				}
 				return try Shop(fields: value)
 
+				case "sitemap":
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
+				}
+				return try Sitemap(fields: value)
+
 				case "urlRedirects":
 				guard let value = value as? [String: Any] else {
 					throw SchemaViolationError(type: QueryRoot.self, field: fieldName, value: fieldValue)
@@ -1360,12 +1404,12 @@ extension Storefront {
 		}
 
 		/// Find a blog by its handle. 
-		@available(*, deprecated, message:"Use `blog` instead.")
+		@available(*, deprecated, message: "Use `blog` instead.")
 		open var blogByHandle: Storefront.Blog? {
 			return internalGetBlogByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `blog` instead.")
+		@available(*, deprecated, message: "Use `blog` instead.")
 
 		open func aliasedBlogByHandle(alias: String) -> Storefront.Blog? {
 			return internalGetBlogByHandle(alias: alias)
@@ -1430,12 +1474,12 @@ extension Storefront {
 		}
 
 		/// Find a collection by its handle. 
-		@available(*, deprecated, message:"Use `collection` instead.")
+		@available(*, deprecated, message: "Use `collection` instead.")
 		open var collectionByHandle: Storefront.Collection? {
 			return internalGetCollectionByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `collection` instead.")
+		@available(*, deprecated, message: "Use `collection` instead.")
 
 		open func aliasedCollectionByHandle(alias: String) -> Storefront.Collection? {
 			return internalGetCollectionByHandle(alias: alias)
@@ -1577,12 +1621,12 @@ extension Storefront {
 		}
 
 		/// Find a page by its handle. 
-		@available(*, deprecated, message:"Use `page` instead.")
+		@available(*, deprecated, message: "Use `page` instead.")
 		open var pageByHandle: Storefront.Page? {
 			return internalGetPageByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `page` instead.")
+		@available(*, deprecated, message: "Use `page` instead.")
 
 		open func aliasedPageByHandle(alias: String) -> Storefront.Page? {
 			return internalGetPageByHandle(alias: alias)
@@ -1603,6 +1647,15 @@ extension Storefront {
 
 		func internalGetPages(alias: String? = nil) -> Storefront.PageConnection {
 			return field(field: "pages", aliasSuffix: alias) as! Storefront.PageConnection
+		}
+
+		/// Settings related to payments. 
+		open var paymentSettings: Storefront.PaymentSettings {
+			return internalGetPaymentSettings()
+		}
+
+		func internalGetPaymentSettings(alias: String? = nil) -> Storefront.PaymentSettings {
+			return field(field: "paymentSettings", aliasSuffix: alias) as! Storefront.PaymentSettings
 		}
 
 		/// List of the predictive search results. 
@@ -1632,12 +1685,12 @@ extension Storefront {
 		}
 
 		/// Find a product by its handle. 
-		@available(*, deprecated, message:"Use `product` instead.")
+		@available(*, deprecated, message: "Use `product` instead.")
 		open var productByHandle: Storefront.Product? {
 			return internalGetProductByHandle()
 		}
 
-		@available(*, deprecated, message:"Use `product` instead.")
+		@available(*, deprecated, message: "Use `product` instead.")
 
 		open func aliasedProductByHandle(alias: String) -> Storefront.Product? {
 			return internalGetProductByHandle(alias: alias)
@@ -1691,8 +1744,9 @@ extension Storefront {
 			return field(field: "productTypes", aliasSuffix: alias) as! Storefront.StringConnection
 		}
 
-		/// List of the shop’s products. For storefront search, use [`search` 
-		/// query](https://shopify.dev/docs/api/storefront/latest/queries/search). 
+		/// Returns a list of the shop's products. For storefront search, use the 
+		/// [`search`](https://shopify.dev/docs/api/storefront/latest/queries/search) 
+		/// query. 
 		open var products: Storefront.ProductConnection {
 			return internalGetProducts()
 		}
@@ -1737,6 +1791,19 @@ extension Storefront {
 			return field(field: "shop", aliasSuffix: alias) as! Storefront.Shop
 		}
 
+		/// Contains all fields required to generate sitemaps. 
+		open var sitemap: Storefront.Sitemap {
+			return internalGetSitemap()
+		}
+
+		open func aliasedSitemap(alias: String) -> Storefront.Sitemap {
+			return internalGetSitemap(alias: alias)
+		}
+
+		func internalGetSitemap(alias: String? = nil) -> Storefront.Sitemap {
+			return field(field: "sitemap", aliasSuffix: alias) as! Storefront.Sitemap
+		}
+
 		/// A list of redirects for a shop. 
 		open var urlRedirects: Storefront.UrlRedirectConnection {
 			return internalGetUrlRedirects()
@@ -1750,10 +1817,10 @@ extension Storefront {
 			return field(field: "urlRedirects", aliasSuffix: alias) as! Storefront.UrlRedirectConnection
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
 					case "article":
 					if let value = internalGetArticle() {
 						response.append(value)
@@ -1868,6 +1935,10 @@ extension Storefront {
 					response.append(internalGetPages())
 					response.append(contentsOf: internalGetPages().childResponseObjectMap())
 
+					case "paymentSettings":
+					response.append(internalGetPaymentSettings())
+					response.append(contentsOf: internalGetPaymentSettings().childResponseObjectMap())
+
 					case "predictiveSearch":
 					if let value = internalGetPredictiveSearch() {
 						response.append(value)
@@ -1919,6 +1990,10 @@ extension Storefront {
 					case "shop":
 					response.append(internalGetShop())
 					response.append(contentsOf: internalGetShop().childResponseObjectMap())
+
+					case "sitemap":
+					response.append(internalGetSitemap())
+					response.append(contentsOf: internalGetSitemap().childResponseObjectMap())
 
 					case "urlRedirects":
 					response.append(internalGetUrlRedirects())

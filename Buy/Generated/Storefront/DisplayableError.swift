@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -68,15 +68,6 @@ extension Storefront {
 
 		/// Represents an error in the input of a mutation. 
 		@discardableResult
-		open func onCheckoutUserError(subfields: (CheckoutUserErrorQuery) -> Void) -> DisplayableErrorQuery {
-			let subquery = CheckoutUserErrorQuery()
-			subfields(subquery)
-			addInlineFragment(on: "CheckoutUserError", subfields: subquery)
-			return self
-		}
-
-		/// Represents an error in the input of a mutation. 
-		@discardableResult
 		open func onCustomerUserError(subfields: (CustomerUserErrorQuery) -> Void) -> DisplayableErrorQuery {
 			let subquery = CustomerUserErrorQuery()
 			subfields(subquery)
@@ -108,6 +99,15 @@ extension Storefront {
 			let subquery = UserErrorQuery()
 			subfields(subquery)
 			addInlineFragment(on: "UserError", subfields: subquery)
+			return self
+		}
+
+		/// Represents an error in the input of a mutation. 
+		@discardableResult
+		open func onUserErrorsShopPayPaymentRequestSessionUserErrors(subfields: (UserErrorsShopPayPaymentRequestSessionUserErrorsQuery) -> Void) -> DisplayableErrorQuery {
+			let subquery = UserErrorsShopPayPaymentRequestSessionUserErrorsQuery()
+			subfields(subquery)
+			addInlineFragment(on: "UserErrorsShopPayPaymentRequestSessionUserErrors", subfields: subquery)
 			return self
 		}
 	}
@@ -144,8 +144,6 @@ extension Storefront {
 			switch typeName {
 				case "CartUserError": return try CartUserError.init(fields: fields)
 
-				case "CheckoutUserError": return try CheckoutUserError.init(fields: fields)
-
 				case "CustomerUserError": return try CustomerUserError.init(fields: fields)
 
 				case "MetafieldDeleteUserError": return try MetafieldDeleteUserError.init(fields: fields)
@@ -153,6 +151,8 @@ extension Storefront {
 				case "MetafieldsSetUserError": return try MetafieldsSetUserError.init(fields: fields)
 
 				case "UserError": return try UserError.init(fields: fields)
+
+				case "UserErrorsShopPayPaymentRequestSessionUserErrors": return try UserErrorsShopPayPaymentRequestSessionUserErrors.init(fields: fields)
 
 				default:
 				return try UnknownDisplayableError.init(fields: fields)
@@ -177,7 +177,7 @@ extension Storefront {
 			return field(field: "message", aliasSuffix: alias) as! String
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			return []
 		}
 	}

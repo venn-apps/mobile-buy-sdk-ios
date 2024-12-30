@@ -3,7 +3,7 @@
 //  BuyTests
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ class Graph_ClientTests: XCTestCase {
     let language    = Locale.init(identifier: "zh-CN")
 
     // ----------------------------------
-    //  MARK: - Init -
+    // MARK: - Init -
     //
     func testInit() {
         let client = self.defaultClient()
@@ -56,7 +56,7 @@ class Graph_ClientTests: XCTestCase {
         let client = self.defaultClient()
 
         XCTAssertEqual(client.headers.count, 5)
-        XCTAssertEqual(client.headers["User-Agent"],    Global.userAgent)
+        XCTAssertEqual(client.headers["User-Agent"], Global.userAgent)
         XCTAssertEqual(client.headers["X-SDK-Version"], Global.frameworkVersion)
         XCTAssertEqual(client.headers["X-SDK-Variant"], "ios")
         XCTAssertEqual(client.headers["X-Shopify-Storefront-Access-Token"], self.apiKey)
@@ -64,18 +64,29 @@ class Graph_ClientTests: XCTestCase {
     }
 
     // ----------------------------------
-    //  MARK: - Requests -
+    // MARK: - Requests -
     //
     func testRequestGeneration() {
-        let client  = self.defaultClient()
-        let request = client.graphRequestFor(query: self.defaultQueryPayload().query)
+        let client = self.defaultClient()
+        let query = self.defaultQueryPayload().query
+        let request = client.graphRequestFor(query: query)
 
         XCTAssertEqual(request.httpMethod, "POST")
-        XCTAssertTrue(request.httpBody?.count ?? 0 > 0)
+
+        guard let bodyData = request.httpBody else {
+            return XCTFail("expected request to have a body")
+        }
+
+        let decodedBody = try! JSONDecoder().decode(
+            Dictionary<String, String>.self, from: bodyData
+        )
+
+        XCTAssertEqual(decodedBody["query"], query.description)
+
         XCTAssertFalse(request.httpShouldHandleCookies)
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"),       "application/json")
-        XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/graphql")
-        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Query-Tag"),  SHA256.hash(request.httpBody!))
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Accept"), "application/json")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "Content-Type"), "application/json")
+        XCTAssertEqual(request.value(forHTTPHeaderField: "X-Query-Tag"), SHA256.hash(request.httpBody!))
 
         // Ensure that the client inserts defaults headers
         XCTAssertNotNil(request.value(forHTTPHeaderField: "User-Agent"))
@@ -83,14 +94,14 @@ class Graph_ClientTests: XCTestCase {
     }
 
     // ----------------------------------
-    //  MARK: - Queries -
+    // MARK: - Queries -
     //
     func testQuery() {
         let client  = self.defaultClient()
         let payload = self.defaultQueryPayload()
         let request = client.graphRequestFor(query: payload.query)
 
-        let task = client.queryGraphWith(payload.query, cachePolicy: .networkFirst(expireIn: 20)) { query, error in } as! Graph.InternalTask<Storefront.QueryRoot>
+        let task = client.queryGraphWith(payload.query, cachePolicy: .networkFirst(expireIn: 20)) { _, _ in } as! Graph.InternalTask<Storefront.QueryRoot>
 
         XCTAssertTrue(task.session === client.session)
         XCTAssertTrue(task.cache   === client.cache)
@@ -104,7 +115,7 @@ class Graph_ClientTests: XCTestCase {
         client.cachePolicy = .cacheOnly
 
         let payload = self.defaultQueryPayload()
-        let task    = client.queryGraphWith(payload.query) { query, error in } as! Graph.InternalTask<Storefront.QueryRoot>
+        let task    = client.queryGraphWith(payload.query) { _, _ in } as! Graph.InternalTask<Storefront.QueryRoot>
 
         XCTAssertEqual(task.cachePolicy, .cacheOnly)
     }
@@ -114,7 +125,7 @@ class Graph_ClientTests: XCTestCase {
         let payload = self.defaultMutationPayload()
         let request = client.graphRequestFor(query: payload.mutation)
 
-        let task = client.mutateGraphWith(payload.mutation) { query, error in
+        let task = client.mutateGraphWith(payload.mutation) { _, _ in
 
         } as! Graph.InternalTask<Storefront.Mutation>
 
@@ -126,7 +137,7 @@ class Graph_ClientTests: XCTestCase {
     }
 
     // ----------------------------------
-    //  MARK: - Private -
+    // MARK: - Private -
     //
     private func defaultClient() -> Graph.Client {
         return Graph.Client(shopDomain: self.shopDomain, apiKey: self.apiKey, session: MockSession(), locale: self.language)
@@ -153,19 +164,19 @@ class Graph_ClientTests: XCTestCase {
     private func defaultMutationPayload() -> (mutation: Storefront.MutationQuery, response: [String: Any]) {
 
         let mutation = Storefront.buildMutation { $0
-            .checkoutEmailUpdateV2(checkoutId: GraphQL.ID(rawValue: "123"), email: "john.smith@gmail.com") { $0
-                .checkoutUserErrors { $0
-                    .code()
-                    .message()
-                    .field()
-                }
-            }
+			.cartCreate { $0
+				.userErrors { $0
+					.code()
+					.message()
+					.field()
+				}
+			}
         }
 
         let response = [
             "data": [
-                "checkoutEmailUpdateV2": [
-                    "checkoutUserErrors": []
+                "cartCreate": [
+                    "userErrors": []
                 ]
             ]
         ]

@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,13 @@ extension Storefront {
 			addField(field: "discountedAmount", aliasSuffix: alias, subfields: subquery)
 			return self
 		}
+
+		/// The type of line that the discount is applicable towards. 
+		@discardableResult
+		open func targetType(alias: String? = nil) -> CartCodeDiscountAllocationQuery {
+			addField(field: "targetType", aliasSuffix: alias)
+			return self
+		}
 	}
 
 	/// The discount that has been applied to the cart line using a discount code. 
@@ -67,6 +74,12 @@ extension Storefront {
 					throw SchemaViolationError(type: CartCodeDiscountAllocation.self, field: fieldName, value: fieldValue)
 				}
 				return try MoneyV2(fields: value)
+
+				case "targetType":
+				guard let value = value as? String else {
+					throw SchemaViolationError(type: CartCodeDiscountAllocation.self, field: fieldName, value: fieldValue)
+				}
+				return DiscountApplicationTargetType(rawValue: value) ?? .unknownValue
 
 				default:
 				throw SchemaViolationError(type: CartCodeDiscountAllocation.self, field: fieldName, value: fieldValue)
@@ -91,10 +104,19 @@ extension Storefront {
 			return field(field: "discountedAmount", aliasSuffix: alias) as! Storefront.MoneyV2
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		/// The type of line that the discount is applicable towards. 
+		open var targetType: Storefront.DiscountApplicationTargetType {
+			return internalGetTargetType()
+		}
+
+		func internalGetTargetType(alias: String? = nil) -> Storefront.DiscountApplicationTargetType {
+			return field(field: "targetType", aliasSuffix: alias) as! Storefront.DiscountApplicationTargetType
+		}
+
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
 					case "discountedAmount":
 					response.append(internalGetDiscountedAmount())
 					response.append(contentsOf: internalGetDiscountedAmount().childResponseObjectMap())

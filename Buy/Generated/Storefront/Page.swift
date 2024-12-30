@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,9 @@ extension Storefront {
 			return self
 		}
 
-		/// Returns a metafield found by namespace and key. 
+		/// A [custom field](https://shopify.dev/docs/apps/build/custom-data), 
+		/// including its `namespace` and `key`, that's associated with a Shopify 
+		/// resource for the purposes of adding and storing additional information. 
 		///
 		/// - parameters:
 		///     - namespace: The container the metafield belongs to. If omitted, the app-reserved namespace will be used.
@@ -93,8 +95,8 @@ extension Storefront {
 			return self
 		}
 
-		/// The metafields associated with the resource matching the supplied list of 
-		/// namespaces and keys. 
+		/// A list of [custom fields](/docs/apps/build/custom-data) that a merchant 
+		/// associates with a Shopify resource. 
 		///
 		/// - parameters:
 		///     - identifiers: The list of metafields to retrieve by namespace and key.
@@ -105,7 +107,7 @@ extension Storefront {
 		open func metafields(alias: String? = nil, identifiers: [HasMetafieldsIdentifier], _ subfields: (MetafieldQuery) -> Void) -> PageQuery {
 			var args: [String] = []
 
-			args.append("identifiers:[\(identifiers.map{ "\($0.serialize())" }.joined(separator: ","))]")
+			args.append("identifiers:[\(identifiers.map { "\($0.serialize())" }.joined(separator: ","))]")
 
 			let argsString = "(\(args.joined(separator: ",")))"
 
@@ -142,8 +144,13 @@ extension Storefront {
 			return self
 		}
 
-		/// A URL parameters to be added to a page URL when it is linked from a GraphQL 
-		/// result. This allows for tracking the origin of the traffic. 
+		/// URL parameters to be added to a page URL to track the origin of on-site 
+		/// search traffic for [analytics 
+		/// reporting](https://help.shopify.com/manual/reports-and-analytics/shopify-reports/report-types/default-reports/behaviour-reports). 
+		/// Returns a result when accessed through the 
+		/// [search](https://shopify.dev/docs/api/storefront/current/queries/search) or 
+		/// [predictiveSearch](https://shopify.dev/docs/api/storefront/current/queries/predictiveSearch) 
+		/// queries, otherwise returns null. 
 		@discardableResult
 		open func trackingParameters(alias: String? = nil) -> PageQuery {
 			addField(field: "trackingParameters", aliasSuffix: alias)
@@ -297,7 +304,9 @@ extension Storefront {
 			return field(field: "id", aliasSuffix: alias) as! GraphQL.ID
 		}
 
-		/// Returns a metafield found by namespace and key. 
+		/// A [custom field](https://shopify.dev/docs/apps/build/custom-data), 
+		/// including its `namespace` and `key`, that's associated with a Shopify 
+		/// resource for the purposes of adding and storing additional information. 
 		open var metafield: Storefront.Metafield? {
 			return internalGetMetafield()
 		}
@@ -310,8 +319,8 @@ extension Storefront {
 			return field(field: "metafield", aliasSuffix: alias) as! Storefront.Metafield?
 		}
 
-		/// The metafields associated with the resource matching the supplied list of 
-		/// namespaces and keys. 
+		/// A list of [custom fields](/docs/apps/build/custom-data) that a merchant 
+		/// associates with a Shopify resource. 
 		open var metafields: [Storefront.Metafield?] {
 			return internalGetMetafields()
 		}
@@ -353,8 +362,13 @@ extension Storefront {
 			return field(field: "title", aliasSuffix: alias) as! String
 		}
 
-		/// A URL parameters to be added to a page URL when it is linked from a GraphQL 
-		/// result. This allows for tracking the origin of the traffic. 
+		/// URL parameters to be added to a page URL to track the origin of on-site 
+		/// search traffic for [analytics 
+		/// reporting](https://help.shopify.com/manual/reports-and-analytics/shopify-reports/report-types/default-reports/behaviour-reports). 
+		/// Returns a result when accessed through the 
+		/// [search](https://shopify.dev/docs/api/storefront/current/queries/search) or 
+		/// [predictiveSearch](https://shopify.dev/docs/api/storefront/current/queries/predictiveSearch) 
+		/// queries, otherwise returns null. 
 		open var trackingParameters: String? {
 			return internalGetTrackingParameters()
 		}
@@ -372,10 +386,10 @@ extension Storefront {
 			return field(field: "updatedAt", aliasSuffix: alias) as! Date
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
 					case "metafield":
 					if let value = internalGetMetafield() {
 						response.append(value)

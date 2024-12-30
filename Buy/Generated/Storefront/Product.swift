@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -27,13 +27,62 @@
 import Foundation
 
 extension Storefront {
-	/// A product represents an individual item for sale in a Shopify store. 
-	/// Products are often physical, but they don't have to be. For example, a 
-	/// digital download (such as a movie, music or ebook file) also qualifies as a 
-	/// product, as do services (such as equipment rental, work for hire, 
-	/// customization of another product or an extended warranty). 
+	/// The `Product` object lets you manage products in a merchant’s store. 
+	/// Products are the goods and services that merchants offer to customers. They 
+	/// can include various details such as title, description, price, images, and 
+	/// options such as size or color. You can use [product 
+	/// variants](/docs/api/storefront/latest/objects/ProductVariant) to create or 
+	/// update different versions of the same product. You can also add or update 
+	/// product [media](/docs/api/storefront/latest/interfaces/Media). Products can 
+	/// be organized by grouping them into a 
+	/// [collection](/docs/api/storefront/latest/objects/Collection). Learn more 
+	/// about working with [products and 
+	/// collections](/docs/storefronts/headless/building-with-the-storefront-api/products-collections). 
 	open class ProductQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = Product
+
+		/// A list of variants whose selected options differ with the provided selected 
+		/// options by one, ordered by variant id. If selected options are not 
+		/// provided, adjacent variants to the first available variant is returned. 
+		/// Note that this field returns an array of variants. In most cases, the 
+		/// number of variants in this array will be low. However, with a low number of 
+		/// options and a high number of values per option, the number of variants 
+		/// returned here can be high. In such cases, it recommended to avoid using 
+		/// this field. This list of variants can be used in combination with the 
+		/// `options` field to build a rich variant picker that includes variant 
+		/// availability or other variant information. 
+		///
+		/// - parameters:
+		///     - selectedOptions: The input fields used for a selected option.
+		///        
+		///        The input must not contain more than `250` values.
+		///     - ignoreUnknownOptions: Whether to ignore product options that are not present on the requested product.
+		///     - caseInsensitiveMatch: Whether to perform case insensitive match on option names and values.
+		///
+		@discardableResult
+		open func adjacentVariants(alias: String? = nil, selectedOptions: [SelectedOptionInput]? = nil, ignoreUnknownOptions: Bool? = nil, caseInsensitiveMatch: Bool? = nil, _ subfields: (ProductVariantQuery) -> Void) -> ProductQuery {
+			var args: [String] = []
+
+			if let selectedOptions = selectedOptions {
+				args.append("selectedOptions:[\(selectedOptions.map { "\($0.serialize())" }.joined(separator: ","))]")
+			}
+
+			if let ignoreUnknownOptions = ignoreUnknownOptions {
+				args.append("ignoreUnknownOptions:\(ignoreUnknownOptions)")
+			}
+
+			if let caseInsensitiveMatch = caseInsensitiveMatch {
+				args.append("caseInsensitiveMatch:\(caseInsensitiveMatch)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = ProductVariantQuery()
+			subfields(subquery)
+
+			addField(field: "adjacentVariants", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
 
 		/// Indicates if at least one product variant is available for sale. 
 		@discardableResult
@@ -42,7 +91,19 @@ extension Storefront {
 			return self
 		}
 
-		/// List of collections a product belongs to. 
+		/// The category of a product from [Shopify's Standard Product 
+		/// Taxonomy](https://shopify.github.io/product-taxonomy/releases/unstable/?categoryId=sg-4-17-2-17). 
+		@discardableResult
+		open func category(alias: String? = nil, _ subfields: (TaxonomyCategoryQuery) -> Void) -> ProductQuery {
+			let subquery = TaxonomyCategoryQuery()
+			subfields(subquery)
+
+			addField(field: "category", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
+		/// A list of [collections](/docs/api/storefront/latest/objects/Collection) 
+		/// that include the product. 
 		///
 		/// - parameters:
 		///     - first: Returns up to the first `n` elements from the list.
@@ -84,7 +145,9 @@ extension Storefront {
 			return self
 		}
 
-		/// The compare at price of the product across all variants. 
+		/// The [compare-at price 
+		/// range](https://help.shopify.com/manual/products/details/product-pricing/sale-pricing) 
+		/// of the product in the shop's default currency. 
 		@discardableResult
 		open func compareAtPriceRange(alias: String? = nil, _ subfields: (ProductPriceRangeQuery) -> Void) -> ProductQuery {
 			let subquery = ProductPriceRangeQuery()
@@ -101,10 +164,11 @@ extension Storefront {
 			return self
 		}
 
-		/// Stripped description of the product, single line with HTML tags removed. 
+		/// A single-line description of the product, with [HTML 
+		/// tags](https://developer.mozilla.org/en-US/docs/Web/HTML) removed. 
 		///
 		/// - parameters:
-		///     - truncateAt: Truncates string after the given length.
+		///     - truncateAt: Truncates a string after the given length.
 		///
 		@discardableResult
 		open func description(alias: String? = nil, truncateAt: Int32? = nil) -> ProductQuery {
@@ -120,10 +184,66 @@ extension Storefront {
 			return self
 		}
 
-		/// The description of the product, complete with HTML formatting. 
+		/// The description of the product, with HTML tags. For example, the 
+		/// description might include bold `<strong></strong>` and italic `<i></i>` 
+		/// text. 
 		@discardableResult
 		open func descriptionHtml(alias: String? = nil) -> ProductQuery {
 			addField(field: "descriptionHtml", aliasSuffix: alias)
+			return self
+		}
+
+		/// An encoded string containing all option value combinations with a 
+		/// corresponding variant that is currently available for sale. Integers 
+		/// represent option and values: [0,1] represents option_value at array index 0 
+		/// for the option at array index 0 `:`, `,`, ` ` and `-` are control 
+		/// characters. `:` indicates a new option. ex: 0:1 indicates value 0 for the 
+		/// option in position 1, value 1 for the option in position 2. `,` indicates 
+		/// the end of a repeated prefix, mulitple consecutive commas indicate the end 
+		/// of multiple repeated prefixes. ` ` indicates a gap in the sequence of 
+		/// option values. ex: 0 4 indicates option values in position 0 and 4 are 
+		/// present. `-` indicates a continuous range of option values. ex: 0 1-3 4 
+		/// Decoding process: Example options: [Size, Color, Material] Example values: 
+		/// [[Small, Medium, Large], [Red, Blue], [Cotton, Wool]] Example encoded 
+		/// string: "0:0:0,1:0-1,,1:0:0-1,1:1,,2:0:1,1:0,," Step 1: Expand ranges into 
+		/// the numbers they represent: "0:0:0,1:0 1,,1:0:0 1,1:1,,2:0:1,1:0,," Step 2: 
+		/// Expand repeated prefixes: "0:0:0,0:1:0 1,1:0:0 1,1:1:1,2:0:1,2:1:0," Step 
+		/// 3: Expand shared prefixes so data is encoded as a string: 
+		/// "0:0:0,0:1:0,0:1:1,1:0:0,1:0:1,1:1:1,2:0:1,2:1:0," Step 4: Map to options + 
+		/// option values to determine existing variants: [Small, Red, Cotton] (0:0:0), 
+		/// [Small, Blue, Cotton] (0:1:0), [Small, Blue, Wool] (0:1:1), [Medium, Red, 
+		/// Cotton] (1:0:0), [Medium, Red, Wool] (1:0:1), [Medium, Blue, Wool] (1:1:1), 
+		/// [Large, Red, Wool] (2:0:1), [Large, Blue, Cotton] (2:1:0). 
+		@discardableResult
+		open func encodedVariantAvailability(alias: String? = nil) -> ProductQuery {
+			addField(field: "encodedVariantAvailability", aliasSuffix: alias)
+			return self
+		}
+
+		/// An encoded string containing all option value combinations with a 
+		/// corresponding variant. Integers represent option and values: [0,1] 
+		/// represents option_value at array index 0 for the option at array index 0 
+		/// `:`, `,`, ` ` and `-` are control characters. `:` indicates a new option. 
+		/// ex: 0:1 indicates value 0 for the option in position 1, value 1 for the 
+		/// option in position 2. `,` indicates the end of a repeated prefix, mulitple 
+		/// consecutive commas indicate the end of multiple repeated prefixes. ` ` 
+		/// indicates a gap in the sequence of option values. ex: 0 4 indicates option 
+		/// values in position 0 and 4 are present. `-` indicates a continuous range of 
+		/// option values. ex: 0 1-3 4 Decoding process: Example options: [Size, Color, 
+		/// Material] Example values: [[Small, Medium, Large], [Red, Blue], [Cotton, 
+		/// Wool]] Example encoded string: "0:0:0,1:0-1,,1:0:0-1,1:1,,2:0:1,1:0,," Step 
+		/// 1: Expand ranges into the numbers they represent: "0:0:0,1:0 1,,1:0:0 
+		/// 1,1:1,,2:0:1,1:0,," Step 2: Expand repeated prefixes: "0:0:0,0:1:0 1,1:0:0 
+		/// 1,1:1:1,2:0:1,2:1:0," Step 3: Expand shared prefixes so data is encoded as 
+		/// a string: "0:0:0,0:1:0,0:1:1,1:0:0,1:0:1,1:1:1,2:0:1,2:1:0," Step 4: Map to 
+		/// options + option values to determine existing variants: [Small, Red, 
+		/// Cotton] (0:0:0), [Small, Blue, Cotton] (0:1:0), [Small, Blue, Wool] 
+		/// (0:1:1), [Medium, Red, Cotton] (1:0:0), [Medium, Red, Wool] (1:0:1), 
+		/// [Medium, Blue, Wool] (1:1:1), [Large, Red, Wool] (2:0:1), [Large, Blue, 
+		/// Cotton] (2:1:0). 
+		@discardableResult
+		open func encodedVariantExistence(alias: String? = nil) -> ProductQuery {
+			addField(field: "encodedVariantExistence", aliasSuffix: alias)
 			return self
 		}
 
@@ -138,9 +258,9 @@ extension Storefront {
 			return self
 		}
 
-		/// A human-friendly unique string for the Product automatically generated from 
-		/// its title. They are used by the Liquid templating language to refer to 
-		/// objects. 
+		/// A unique, human-readable string of the product's title. A handle can 
+		/// contain letters, hyphens (`-`), and numbers, but no spaces. The handle is 
+		/// used in the online store URL for the product. 
 		@discardableResult
 		open func handle(alias: String? = nil) -> ProductQuery {
 			addField(field: "handle", aliasSuffix: alias)
@@ -208,7 +328,8 @@ extension Storefront {
 			return self
 		}
 
-		/// The media associated with the product. 
+		/// The [media](/docs/apps/build/online-store/product-media) that are 
+		/// associated with the product. Valid media are images, 3D models, videos. 
 		///
 		/// - parameters:
 		///     - first: Returns up to the first `n` elements from the list.
@@ -255,7 +376,9 @@ extension Storefront {
 			return self
 		}
 
-		/// Returns a metafield found by namespace and key. 
+		/// A [custom field](https://shopify.dev/docs/apps/build/custom-data), 
+		/// including its `namespace` and `key`, that's associated with a Shopify 
+		/// resource for the purposes of adding and storing additional information. 
 		///
 		/// - parameters:
 		///     - namespace: The container the metafield belongs to. If omitted, the app-reserved namespace will be used.
@@ -280,8 +403,8 @@ extension Storefront {
 			return self
 		}
 
-		/// The metafields associated with the resource matching the supplied list of 
-		/// namespaces and keys. 
+		/// A list of [custom fields](/docs/apps/build/custom-data) that a merchant 
+		/// associates with a Shopify resource. 
 		///
 		/// - parameters:
 		///     - identifiers: The list of metafields to retrieve by namespace and key.
@@ -292,7 +415,7 @@ extension Storefront {
 		open func metafields(alias: String? = nil, identifiers: [HasMetafieldsIdentifier], _ subfields: (MetafieldQuery) -> Void) -> ProductQuery {
 			var args: [String] = []
 
-			args.append("identifiers:[\(identifiers.map{ "\($0.serialize())" }.joined(separator: ","))]")
+			args.append("identifiers:[\(identifiers.map { "\($0.serialize())" }.joined(separator: ","))]")
 
 			let argsString = "(\(args.joined(separator: ",")))"
 
@@ -303,16 +426,18 @@ extension Storefront {
 			return self
 		}
 
-		/// The URL used for viewing the resource on the shop's Online Store. Returns 
-		/// `null` if the resource is currently not published to the Online Store sales 
-		/// channel. 
+		/// The product's URL on the online store. If `null`, then the product isn't 
+		/// published to the online store sales channel. 
 		@discardableResult
 		open func onlineStoreUrl(alias: String? = nil) -> ProductQuery {
 			addField(field: "onlineStoreUrl", aliasSuffix: alias)
 			return self
 		}
 
-		/// List of product options. 
+		/// A list of product options. The limit is defined by the [shop's resource 
+		/// limits for product 
+		/// options](/docs/api/admin-graphql/latest/objects/Shop#field-resourcelimits) 
+		/// (`Shop.resourceLimits.maxProductOptions`). 
 		///
 		/// - parameters:
 		///     - first: Truncate the array result to this size.
@@ -334,7 +459,9 @@ extension Storefront {
 			return self
 		}
 
-		/// The price range. 
+		/// The minimum and maximum prices of a product, expressed in decimal numbers. 
+		/// For example, if the product is priced between $10.00 and $50.00, then the 
+		/// price range is $10.00 - $50.00. 
 		@discardableResult
 		open func priceRange(alias: String? = nil, _ subfields: (ProductPriceRangeQuery) -> Void) -> ProductQuery {
 			let subquery = ProductPriceRangeQuery()
@@ -344,8 +471,9 @@ extension Storefront {
 			return self
 		}
 
-		/// A categorization that a product can be tagged with, commonly used for 
-		/// filtering and searching. 
+		/// The [product 
+		/// type](https://help.shopify.com/manual/products/details/product-type) that 
+		/// merchants define. 
 		@discardableResult
 		open func productType(alias: String? = nil) -> ProductQuery {
 			addField(field: "productType", aliasSuffix: alias)
@@ -359,17 +487,59 @@ extension Storefront {
 			return self
 		}
 
-		/// Whether the product can only be purchased with a selling plan. 
+		/// Whether the product can only be purchased with a [selling 
+		/// plan](/docs/apps/build/purchase-options/subscriptions/selling-plans). 
+		/// Products that are sold on subscription (`requiresSellingPlan: true`) can be 
+		/// updated only for online stores. If you update a product to be 
+		/// subscription-only (`requiresSellingPlan:false`), then the product is 
+		/// unpublished from all channels, except the online store. 
 		@discardableResult
 		open func requiresSellingPlan(alias: String? = nil) -> ProductQuery {
 			addField(field: "requiresSellingPlan", aliasSuffix: alias)
 			return self
 		}
 
-		/// A list of a product's available selling plan groups. A selling plan group 
-		/// represents a selling method. For example, 'Subscribe and save' is a selling 
-		/// method where customers pay for goods or services per delivery. A selling 
-		/// plan group contains individual selling plans. 
+		/// Find an active product variant based on selected options, availability or 
+		/// the first variant. All arguments are optional. If no selected options are 
+		/// provided, the first available variant is returned. If no variants are 
+		/// available, the first variant is returned. 
+		///
+		/// - parameters:
+		///     - selectedOptions: The input fields used for a selected option.
+		///        
+		///        The input must not contain more than `250` values.
+		///     - ignoreUnknownOptions: Whether to ignore unknown product options.
+		///     - caseInsensitiveMatch: Whether to perform case insensitive match on option names and values.
+		///
+		@discardableResult
+		open func selectedOrFirstAvailableVariant(alias: String? = nil, selectedOptions: [SelectedOptionInput]? = nil, ignoreUnknownOptions: Bool? = nil, caseInsensitiveMatch: Bool? = nil, _ subfields: (ProductVariantQuery) -> Void) -> ProductQuery {
+			var args: [String] = []
+
+			if let selectedOptions = selectedOptions {
+				args.append("selectedOptions:[\(selectedOptions.map { "\($0.serialize())" }.joined(separator: ","))]")
+			}
+
+			if let ignoreUnknownOptions = ignoreUnknownOptions {
+				args.append("ignoreUnknownOptions:\(ignoreUnknownOptions)")
+			}
+
+			if let caseInsensitiveMatch = caseInsensitiveMatch {
+				args.append("caseInsensitiveMatch:\(caseInsensitiveMatch)")
+			}
+
+			let argsString: String? = args.isEmpty ? nil : "(\(args.joined(separator: ",")))"
+
+			let subquery = ProductVariantQuery()
+			subfields(subquery)
+
+			addField(field: "selectedOrFirstAvailableVariant", aliasSuffix: alias, args: argsString, subfields: subquery)
+			return self
+		}
+
+		/// A list of all [selling plan 
+		/// groups](/docs/apps/build/purchase-options/subscriptions/selling-plans/build-a-selling-plan) 
+		/// that are associated with the product either directly, or through the 
+		/// product's variants. 
 		///
 		/// - parameters:
 		///     - first: Returns up to the first `n` elements from the list.
@@ -411,7 +581,9 @@ extension Storefront {
 			return self
 		}
 
-		/// The product's SEO information. 
+		/// The [SEO title and 
+		/// description](https://help.shopify.com/manual/promoting-marketing/seo/adding-keywords) 
+		/// that are associated with a product. 
 		@discardableResult
 		open func seo(alias: String? = nil, _ subfields: (SEOQuery) -> Void) -> ProductQuery {
 			let subquery = SEOQuery()
@@ -421,31 +593,41 @@ extension Storefront {
 			return self
 		}
 
-		/// A comma separated list of tags that have been added to the product. 
-		/// Additional access scope required for private apps: 
-		/// unauthenticated_read_product_tags. 
+		/// A comma-separated list of searchable keywords that are associated with the 
+		/// product. For example, a merchant might apply the `sports` and `summer` tags 
+		/// to products that are associated with sportwear for summer. Updating `tags` 
+		/// overwrites any existing tags that were previously added to the product. To 
+		/// add new tags without overwriting existing tags, use the GraphQL Admin API's 
+		/// [`tagsAdd`](/docs/api/admin-graphql/latest/mutations/tagsadd) mutation. 
 		@discardableResult
 		open func tags(alias: String? = nil) -> ProductQuery {
 			addField(field: "tags", aliasSuffix: alias)
 			return self
 		}
 
-		/// The product’s title. 
+		/// The name for the product that displays to customers. The title is used to 
+		/// construct the product's handle. For example, if a product is titled "Black 
+		/// Sunglasses", then the handle is `black-sunglasses`. 
 		@discardableResult
 		open func title(alias: String? = nil) -> ProductQuery {
 			addField(field: "title", aliasSuffix: alias)
 			return self
 		}
 
-		/// The total quantity of inventory in stock for this Product. 
+		/// The quantity of inventory that's in stock. 
 		@discardableResult
 		open func totalInventory(alias: String? = nil) -> ProductQuery {
 			addField(field: "totalInventory", aliasSuffix: alias)
 			return self
 		}
 
-		/// A URL parameters to be added to a page URL when it is linked from a GraphQL 
-		/// result. This allows for tracking the origin of the traffic. 
+		/// URL parameters to be added to a page URL to track the origin of on-site 
+		/// search traffic for [analytics 
+		/// reporting](https://help.shopify.com/manual/reports-and-analytics/shopify-reports/report-types/default-reports/behaviour-reports). 
+		/// Returns a result when accessed through the 
+		/// [search](https://shopify.dev/docs/api/storefront/current/queries/search) or 
+		/// [predictiveSearch](https://shopify.dev/docs/api/storefront/current/queries/predictiveSearch) 
+		/// queries, otherwise returns null. 
 		@discardableResult
 		open func trackingParameters(alias: String? = nil) -> ProductQuery {
 			addField(field: "trackingParameters", aliasSuffix: alias)
@@ -478,7 +660,7 @@ extension Storefront {
 		open func variantBySelectedOptions(alias: String? = nil, selectedOptions: [SelectedOptionInput], ignoreUnknownOptions: Bool? = nil, caseInsensitiveMatch: Bool? = nil, _ subfields: (ProductVariantQuery) -> Void) -> ProductQuery {
 			var args: [String] = []
 
-			args.append("selectedOptions:[\(selectedOptions.map{ "\($0.serialize())" }.joined(separator: ","))]")
+			args.append("selectedOptions:[\(selectedOptions.map { "\($0.serialize())" }.joined(separator: ","))]")
 
 			if let ignoreUnknownOptions = ignoreUnknownOptions {
 				args.append("ignoreUnknownOptions:\(ignoreUnknownOptions)")
@@ -497,7 +679,8 @@ extension Storefront {
 			return self
 		}
 
-		/// List of the product’s variants. 
+		/// A list of [variants](/docs/api/storefront/latest/objects/ProductVariant) 
+		/// that are associated with the product. 
 		///
 		/// - parameters:
 		///     - first: Returns up to the first `n` elements from the list.
@@ -544,7 +727,19 @@ extension Storefront {
 			return self
 		}
 
-		/// The product’s vendor name. 
+		/// The number of 
+		/// [variants](/docs/api/storefront/latest/objects/ProductVariant) that are 
+		/// associated with the product. 
+		@discardableResult
+		open func variantsCount(alias: String? = nil, _ subfields: (CountQuery) -> Void) -> ProductQuery {
+			let subquery = CountQuery()
+			subfields(subquery)
+
+			addField(field: "variantsCount", aliasSuffix: alias, subfields: subquery)
+			return self
+		}
+
+		/// The name of the product's vendor. 
 		@discardableResult
 		open func vendor(alias: String? = nil) -> ProductQuery {
 			addField(field: "vendor", aliasSuffix: alias)
@@ -552,22 +747,41 @@ extension Storefront {
 		}
 	}
 
-	/// A product represents an individual item for sale in a Shopify store. 
-	/// Products are often physical, but they don't have to be. For example, a 
-	/// digital download (such as a movie, music or ebook file) also qualifies as a 
-	/// product, as do services (such as equipment rental, work for hire, 
-	/// customization of another product or an extended warranty). 
+	/// The `Product` object lets you manage products in a merchant’s store. 
+	/// Products are the goods and services that merchants offer to customers. They 
+	/// can include various details such as title, description, price, images, and 
+	/// options such as size or color. You can use [product 
+	/// variants](/docs/api/storefront/latest/objects/ProductVariant) to create or 
+	/// update different versions of the same product. You can also add or update 
+	/// product [media](/docs/api/storefront/latest/interfaces/Media). Products can 
+	/// be organized by grouping them into a 
+	/// [collection](/docs/api/storefront/latest/objects/Collection). Learn more 
+	/// about working with [products and 
+	/// collections](/docs/storefronts/headless/building-with-the-storefront-api/products-collections). 
 	open class Product: GraphQL.AbstractResponse, GraphQLObject, HasMetafields, MenuItemResource, MetafieldParentResource, MetafieldReference, Node, OnlineStorePublishable, SearchResultItem, Trackable {
 		public typealias Query = ProductQuery
 
 		internal override func deserializeValue(fieldName: String, value: Any) throws -> Any? {
 			let fieldValue = value
 			switch fieldName {
+				case "adjacentVariants":
+				guard let value = value as? [[String: Any]] else {
+					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
+				}
+				return try value.map { return try ProductVariant(fields: $0) }
+
 				case "availableForSale":
 				guard let value = value as? Bool else {
 					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
 				}
 				return value
+
+				case "category":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
+				}
+				return try TaxonomyCategory(fields: value)
 
 				case "collections":
 				guard let value = value as? [String: Any] else {
@@ -594,6 +808,20 @@ extension Storefront {
 				return value
 
 				case "descriptionHtml":
+				guard let value = value as? String else {
+					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
+				}
+				return value
+
+				case "encodedVariantAvailability":
+				if value is NSNull { return nil }
+				guard let value = value as? String else {
+					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
+				}
+				return value
+
+				case "encodedVariantExistence":
+				if value is NSNull { return nil }
 				guard let value = value as? String else {
 					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
 				}
@@ -690,6 +918,13 @@ extension Storefront {
 				}
 				return value
 
+				case "selectedOrFirstAvailableVariant":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
+				}
+				return try ProductVariant(fields: value)
+
 				case "sellingPlanGroups":
 				guard let value = value as? [String: Any] else {
 					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
@@ -747,6 +982,13 @@ extension Storefront {
 				}
 				return try ProductVariantConnection(fields: value)
 
+				case "variantsCount":
+				if value is NSNull { return nil }
+				guard let value = value as? [String: Any] else {
+					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
+				}
+				return try Count(fields: value)
+
 				case "vendor":
 				guard let value = value as? String else {
 					throw SchemaViolationError(type: Product.self, field: fieldName, value: fieldValue)
@@ -758,6 +1000,28 @@ extension Storefront {
 			}
 		}
 
+		/// A list of variants whose selected options differ with the provided selected 
+		/// options by one, ordered by variant id. If selected options are not 
+		/// provided, adjacent variants to the first available variant is returned. 
+		/// Note that this field returns an array of variants. In most cases, the 
+		/// number of variants in this array will be low. However, with a low number of 
+		/// options and a high number of values per option, the number of variants 
+		/// returned here can be high. In such cases, it recommended to avoid using 
+		/// this field. This list of variants can be used in combination with the 
+		/// `options` field to build a rich variant picker that includes variant 
+		/// availability or other variant information. 
+		open var adjacentVariants: [Storefront.ProductVariant] {
+			return internalGetAdjacentVariants()
+		}
+
+		open func aliasedAdjacentVariants(alias: String) -> [Storefront.ProductVariant] {
+			return internalGetAdjacentVariants(alias: alias)
+		}
+
+		func internalGetAdjacentVariants(alias: String? = nil) -> [Storefront.ProductVariant] {
+			return field(field: "adjacentVariants", aliasSuffix: alias) as! [Storefront.ProductVariant]
+		}
+
 		/// Indicates if at least one product variant is available for sale. 
 		open var availableForSale: Bool {
 			return internalGetAvailableForSale()
@@ -767,7 +1031,18 @@ extension Storefront {
 			return field(field: "availableForSale", aliasSuffix: alias) as! Bool
 		}
 
-		/// List of collections a product belongs to. 
+		/// The category of a product from [Shopify's Standard Product 
+		/// Taxonomy](https://shopify.github.io/product-taxonomy/releases/unstable/?categoryId=sg-4-17-2-17). 
+		open var category: Storefront.TaxonomyCategory? {
+			return internalGetCategory()
+		}
+
+		func internalGetCategory(alias: String? = nil) -> Storefront.TaxonomyCategory? {
+			return field(field: "category", aliasSuffix: alias) as! Storefront.TaxonomyCategory?
+		}
+
+		/// A list of [collections](/docs/api/storefront/latest/objects/Collection) 
+		/// that include the product. 
 		open var collections: Storefront.CollectionConnection {
 			return internalGetCollections()
 		}
@@ -780,7 +1055,9 @@ extension Storefront {
 			return field(field: "collections", aliasSuffix: alias) as! Storefront.CollectionConnection
 		}
 
-		/// The compare at price of the product across all variants. 
+		/// The [compare-at price 
+		/// range](https://help.shopify.com/manual/products/details/product-pricing/sale-pricing) 
+		/// of the product in the shop's default currency. 
 		open var compareAtPriceRange: Storefront.ProductPriceRange {
 			return internalGetCompareAtPriceRange()
 		}
@@ -798,7 +1075,8 @@ extension Storefront {
 			return field(field: "createdAt", aliasSuffix: alias) as! Date
 		}
 
-		/// Stripped description of the product, single line with HTML tags removed. 
+		/// A single-line description of the product, with [HTML 
+		/// tags](https://developer.mozilla.org/en-US/docs/Web/HTML) removed. 
 		open var description: String {
 			return internalGetDescription()
 		}
@@ -811,13 +1089,73 @@ extension Storefront {
 			return field(field: "description", aliasSuffix: alias) as! String
 		}
 
-		/// The description of the product, complete with HTML formatting. 
+		/// The description of the product, with HTML tags. For example, the 
+		/// description might include bold `<strong></strong>` and italic `<i></i>` 
+		/// text. 
 		open var descriptionHtml: String {
 			return internalGetDescriptionHtml()
 		}
 
 		func internalGetDescriptionHtml(alias: String? = nil) -> String {
 			return field(field: "descriptionHtml", aliasSuffix: alias) as! String
+		}
+
+		/// An encoded string containing all option value combinations with a 
+		/// corresponding variant that is currently available for sale. Integers 
+		/// represent option and values: [0,1] represents option_value at array index 0 
+		/// for the option at array index 0 `:`, `,`, ` ` and `-` are control 
+		/// characters. `:` indicates a new option. ex: 0:1 indicates value 0 for the 
+		/// option in position 1, value 1 for the option in position 2. `,` indicates 
+		/// the end of a repeated prefix, mulitple consecutive commas indicate the end 
+		/// of multiple repeated prefixes. ` ` indicates a gap in the sequence of 
+		/// option values. ex: 0 4 indicates option values in position 0 and 4 are 
+		/// present. `-` indicates a continuous range of option values. ex: 0 1-3 4 
+		/// Decoding process: Example options: [Size, Color, Material] Example values: 
+		/// [[Small, Medium, Large], [Red, Blue], [Cotton, Wool]] Example encoded 
+		/// string: "0:0:0,1:0-1,,1:0:0-1,1:1,,2:0:1,1:0,," Step 1: Expand ranges into 
+		/// the numbers they represent: "0:0:0,1:0 1,,1:0:0 1,1:1,,2:0:1,1:0,," Step 2: 
+		/// Expand repeated prefixes: "0:0:0,0:1:0 1,1:0:0 1,1:1:1,2:0:1,2:1:0," Step 
+		/// 3: Expand shared prefixes so data is encoded as a string: 
+		/// "0:0:0,0:1:0,0:1:1,1:0:0,1:0:1,1:1:1,2:0:1,2:1:0," Step 4: Map to options + 
+		/// option values to determine existing variants: [Small, Red, Cotton] (0:0:0), 
+		/// [Small, Blue, Cotton] (0:1:0), [Small, Blue, Wool] (0:1:1), [Medium, Red, 
+		/// Cotton] (1:0:0), [Medium, Red, Wool] (1:0:1), [Medium, Blue, Wool] (1:1:1), 
+		/// [Large, Red, Wool] (2:0:1), [Large, Blue, Cotton] (2:1:0). 
+		open var encodedVariantAvailability: String? {
+			return internalGetEncodedVariantAvailability()
+		}
+
+		func internalGetEncodedVariantAvailability(alias: String? = nil) -> String? {
+			return field(field: "encodedVariantAvailability", aliasSuffix: alias) as! String?
+		}
+
+		/// An encoded string containing all option value combinations with a 
+		/// corresponding variant. Integers represent option and values: [0,1] 
+		/// represents option_value at array index 0 for the option at array index 0 
+		/// `:`, `,`, ` ` and `-` are control characters. `:` indicates a new option. 
+		/// ex: 0:1 indicates value 0 for the option in position 1, value 1 for the 
+		/// option in position 2. `,` indicates the end of a repeated prefix, mulitple 
+		/// consecutive commas indicate the end of multiple repeated prefixes. ` ` 
+		/// indicates a gap in the sequence of option values. ex: 0 4 indicates option 
+		/// values in position 0 and 4 are present. `-` indicates a continuous range of 
+		/// option values. ex: 0 1-3 4 Decoding process: Example options: [Size, Color, 
+		/// Material] Example values: [[Small, Medium, Large], [Red, Blue], [Cotton, 
+		/// Wool]] Example encoded string: "0:0:0,1:0-1,,1:0:0-1,1:1,,2:0:1,1:0,," Step 
+		/// 1: Expand ranges into the numbers they represent: "0:0:0,1:0 1,,1:0:0 
+		/// 1,1:1,,2:0:1,1:0,," Step 2: Expand repeated prefixes: "0:0:0,0:1:0 1,1:0:0 
+		/// 1,1:1:1,2:0:1,2:1:0," Step 3: Expand shared prefixes so data is encoded as 
+		/// a string: "0:0:0,0:1:0,0:1:1,1:0:0,1:0:1,1:1:1,2:0:1,2:1:0," Step 4: Map to 
+		/// options + option values to determine existing variants: [Small, Red, 
+		/// Cotton] (0:0:0), [Small, Blue, Cotton] (0:1:0), [Small, Blue, Wool] 
+		/// (0:1:1), [Medium, Red, Cotton] (1:0:0), [Medium, Red, Wool] (1:0:1), 
+		/// [Medium, Blue, Wool] (1:1:1), [Large, Red, Wool] (2:0:1), [Large, Blue, 
+		/// Cotton] (2:1:0). 
+		open var encodedVariantExistence: String? {
+			return internalGetEncodedVariantExistence()
+		}
+
+		func internalGetEncodedVariantExistence(alias: String? = nil) -> String? {
+			return field(field: "encodedVariantExistence", aliasSuffix: alias) as! String?
 		}
 
 		/// The featured image for the product. This field is functionally equivalent 
@@ -830,9 +1168,9 @@ extension Storefront {
 			return field(field: "featuredImage", aliasSuffix: alias) as! Storefront.Image?
 		}
 
-		/// A human-friendly unique string for the Product automatically generated from 
-		/// its title. They are used by the Liquid templating language to refer to 
-		/// objects. 
+		/// A unique, human-readable string of the product's title. A handle can 
+		/// contain letters, hyphens (`-`), and numbers, but no spaces. The handle is 
+		/// used in the online store URL for the product. 
 		open var handle: String {
 			return internalGetHandle()
 		}
@@ -872,7 +1210,8 @@ extension Storefront {
 			return field(field: "isGiftCard", aliasSuffix: alias) as! Bool
 		}
 
-		/// The media associated with the product. 
+		/// The [media](/docs/apps/build/online-store/product-media) that are 
+		/// associated with the product. Valid media are images, 3D models, videos. 
 		open var media: Storefront.MediaConnection {
 			return internalGetMedia()
 		}
@@ -885,7 +1224,9 @@ extension Storefront {
 			return field(field: "media", aliasSuffix: alias) as! Storefront.MediaConnection
 		}
 
-		/// Returns a metafield found by namespace and key. 
+		/// A [custom field](https://shopify.dev/docs/apps/build/custom-data), 
+		/// including its `namespace` and `key`, that's associated with a Shopify 
+		/// resource for the purposes of adding and storing additional information. 
 		open var metafield: Storefront.Metafield? {
 			return internalGetMetafield()
 		}
@@ -898,8 +1239,8 @@ extension Storefront {
 			return field(field: "metafield", aliasSuffix: alias) as! Storefront.Metafield?
 		}
 
-		/// The metafields associated with the resource matching the supplied list of 
-		/// namespaces and keys. 
+		/// A list of [custom fields](/docs/apps/build/custom-data) that a merchant 
+		/// associates with a Shopify resource. 
 		open var metafields: [Storefront.Metafield?] {
 			return internalGetMetafields()
 		}
@@ -912,9 +1253,8 @@ extension Storefront {
 			return field(field: "metafields", aliasSuffix: alias) as! [Storefront.Metafield?]
 		}
 
-		/// The URL used for viewing the resource on the shop's Online Store. Returns 
-		/// `null` if the resource is currently not published to the Online Store sales 
-		/// channel. 
+		/// The product's URL on the online store. If `null`, then the product isn't 
+		/// published to the online store sales channel. 
 		open var onlineStoreUrl: URL? {
 			return internalGetOnlineStoreUrl()
 		}
@@ -923,7 +1263,10 @@ extension Storefront {
 			return field(field: "onlineStoreUrl", aliasSuffix: alias) as! URL?
 		}
 
-		/// List of product options. 
+		/// A list of product options. The limit is defined by the [shop's resource 
+		/// limits for product 
+		/// options](/docs/api/admin-graphql/latest/objects/Shop#field-resourcelimits) 
+		/// (`Shop.resourceLimits.maxProductOptions`). 
 		open var options: [Storefront.ProductOption] {
 			return internalGetOptions()
 		}
@@ -936,7 +1279,9 @@ extension Storefront {
 			return field(field: "options", aliasSuffix: alias) as! [Storefront.ProductOption]
 		}
 
-		/// The price range. 
+		/// The minimum and maximum prices of a product, expressed in decimal numbers. 
+		/// For example, if the product is priced between $10.00 and $50.00, then the 
+		/// price range is $10.00 - $50.00. 
 		open var priceRange: Storefront.ProductPriceRange {
 			return internalGetPriceRange()
 		}
@@ -945,8 +1290,9 @@ extension Storefront {
 			return field(field: "priceRange", aliasSuffix: alias) as! Storefront.ProductPriceRange
 		}
 
-		/// A categorization that a product can be tagged with, commonly used for 
-		/// filtering and searching. 
+		/// The [product 
+		/// type](https://help.shopify.com/manual/products/details/product-type) that 
+		/// merchants define. 
 		open var productType: String {
 			return internalGetProductType()
 		}
@@ -964,7 +1310,12 @@ extension Storefront {
 			return field(field: "publishedAt", aliasSuffix: alias) as! Date
 		}
 
-		/// Whether the product can only be purchased with a selling plan. 
+		/// Whether the product can only be purchased with a [selling 
+		/// plan](/docs/apps/build/purchase-options/subscriptions/selling-plans). 
+		/// Products that are sold on subscription (`requiresSellingPlan: true`) can be 
+		/// updated only for online stores. If you update a product to be 
+		/// subscription-only (`requiresSellingPlan:false`), then the product is 
+		/// unpublished from all channels, except the online store. 
 		open var requiresSellingPlan: Bool {
 			return internalGetRequiresSellingPlan()
 		}
@@ -973,10 +1324,26 @@ extension Storefront {
 			return field(field: "requiresSellingPlan", aliasSuffix: alias) as! Bool
 		}
 
-		/// A list of a product's available selling plan groups. A selling plan group 
-		/// represents a selling method. For example, 'Subscribe and save' is a selling 
-		/// method where customers pay for goods or services per delivery. A selling 
-		/// plan group contains individual selling plans. 
+		/// Find an active product variant based on selected options, availability or 
+		/// the first variant. All arguments are optional. If no selected options are 
+		/// provided, the first available variant is returned. If no variants are 
+		/// available, the first variant is returned. 
+		open var selectedOrFirstAvailableVariant: Storefront.ProductVariant? {
+			return internalGetSelectedOrFirstAvailableVariant()
+		}
+
+		open func aliasedSelectedOrFirstAvailableVariant(alias: String) -> Storefront.ProductVariant? {
+			return internalGetSelectedOrFirstAvailableVariant(alias: alias)
+		}
+
+		func internalGetSelectedOrFirstAvailableVariant(alias: String? = nil) -> Storefront.ProductVariant? {
+			return field(field: "selectedOrFirstAvailableVariant", aliasSuffix: alias) as! Storefront.ProductVariant?
+		}
+
+		/// A list of all [selling plan 
+		/// groups](/docs/apps/build/purchase-options/subscriptions/selling-plans/build-a-selling-plan) 
+		/// that are associated with the product either directly, or through the 
+		/// product's variants. 
 		open var sellingPlanGroups: Storefront.SellingPlanGroupConnection {
 			return internalGetSellingPlanGroups()
 		}
@@ -989,7 +1356,9 @@ extension Storefront {
 			return field(field: "sellingPlanGroups", aliasSuffix: alias) as! Storefront.SellingPlanGroupConnection
 		}
 
-		/// The product's SEO information. 
+		/// The [SEO title and 
+		/// description](https://help.shopify.com/manual/promoting-marketing/seo/adding-keywords) 
+		/// that are associated with a product. 
 		open var seo: Storefront.SEO {
 			return internalGetSeo()
 		}
@@ -998,9 +1367,12 @@ extension Storefront {
 			return field(field: "seo", aliasSuffix: alias) as! Storefront.SEO
 		}
 
-		/// A comma separated list of tags that have been added to the product. 
-		/// Additional access scope required for private apps: 
-		/// unauthenticated_read_product_tags. 
+		/// A comma-separated list of searchable keywords that are associated with the 
+		/// product. For example, a merchant might apply the `sports` and `summer` tags 
+		/// to products that are associated with sportwear for summer. Updating `tags` 
+		/// overwrites any existing tags that were previously added to the product. To 
+		/// add new tags without overwriting existing tags, use the GraphQL Admin API's 
+		/// [`tagsAdd`](/docs/api/admin-graphql/latest/mutations/tagsadd) mutation. 
 		open var tags: [String] {
 			return internalGetTags()
 		}
@@ -1009,7 +1381,9 @@ extension Storefront {
 			return field(field: "tags", aliasSuffix: alias) as! [String]
 		}
 
-		/// The product’s title. 
+		/// The name for the product that displays to customers. The title is used to 
+		/// construct the product's handle. For example, if a product is titled "Black 
+		/// Sunglasses", then the handle is `black-sunglasses`. 
 		open var title: String {
 			return internalGetTitle()
 		}
@@ -1018,7 +1392,7 @@ extension Storefront {
 			return field(field: "title", aliasSuffix: alias) as! String
 		}
 
-		/// The total quantity of inventory in stock for this Product. 
+		/// The quantity of inventory that's in stock. 
 		open var totalInventory: Int32? {
 			return internalGetTotalInventory()
 		}
@@ -1027,8 +1401,13 @@ extension Storefront {
 			return field(field: "totalInventory", aliasSuffix: alias) as! Int32?
 		}
 
-		/// A URL parameters to be added to a page URL when it is linked from a GraphQL 
-		/// result. This allows for tracking the origin of the traffic. 
+		/// URL parameters to be added to a page URL to track the origin of on-site 
+		/// search traffic for [analytics 
+		/// reporting](https://help.shopify.com/manual/reports-and-analytics/shopify-reports/report-types/default-reports/behaviour-reports). 
+		/// Returns a result when accessed through the 
+		/// [search](https://shopify.dev/docs/api/storefront/current/queries/search) or 
+		/// [predictiveSearch](https://shopify.dev/docs/api/storefront/current/queries/predictiveSearch) 
+		/// queries, otherwise returns null. 
 		open var trackingParameters: String? {
 			return internalGetTrackingParameters()
 		}
@@ -1065,7 +1444,8 @@ extension Storefront {
 			return field(field: "variantBySelectedOptions", aliasSuffix: alias) as! Storefront.ProductVariant?
 		}
 
-		/// List of the product’s variants. 
+		/// A list of [variants](/docs/api/storefront/latest/objects/ProductVariant) 
+		/// that are associated with the product. 
 		open var variants: Storefront.ProductVariantConnection {
 			return internalGetVariants()
 		}
@@ -1078,7 +1458,18 @@ extension Storefront {
 			return field(field: "variants", aliasSuffix: alias) as! Storefront.ProductVariantConnection
 		}
 
-		/// The product’s vendor name. 
+		/// The number of 
+		/// [variants](/docs/api/storefront/latest/objects/ProductVariant) that are 
+		/// associated with the product. 
+		open var variantsCount: Storefront.Count? {
+			return internalGetVariantsCount()
+		}
+
+		func internalGetVariantsCount(alias: String? = nil) -> Storefront.Count? {
+			return field(field: "variantsCount", aliasSuffix: alias) as! Storefront.Count?
+		}
+
+		/// The name of the product's vendor. 
 		open var vendor: String {
 			return internalGetVendor()
 		}
@@ -1087,10 +1478,22 @@ extension Storefront {
 			return field(field: "vendor", aliasSuffix: alias) as! String
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
+					case "adjacentVariants":
+					internalGetAdjacentVariants().forEach {
+						response.append($0)
+						response.append(contentsOf: $0.childResponseObjectMap())
+					}
+
+					case "category":
+					if let value = internalGetCategory() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
 					case "collections":
 					response.append(internalGetCollections())
 					response.append(contentsOf: internalGetCollections().childResponseObjectMap())
@@ -1137,6 +1540,12 @@ extension Storefront {
 					response.append(internalGetPriceRange())
 					response.append(contentsOf: internalGetPriceRange().childResponseObjectMap())
 
+					case "selectedOrFirstAvailableVariant":
+					if let value = internalGetSelectedOrFirstAvailableVariant() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
+
 					case "sellingPlanGroups":
 					response.append(internalGetSellingPlanGroups())
 					response.append(contentsOf: internalGetSellingPlanGroups().childResponseObjectMap())
@@ -1154,6 +1563,12 @@ extension Storefront {
 					case "variants":
 					response.append(internalGetVariants())
 					response.append(contentsOf: internalGetVariants().childResponseObjectMap())
+
+					case "variantsCount":
+					if let value = internalGetVariantsCount() {
+						response.append(value)
+						response.append(contentsOf: value.childResponseObjectMap())
+					}
 
 					default:
 					break

@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -69,7 +69,7 @@ extension Storefront {
 		}
 
 		/// The two-letter code for the country of the address. For example, US. 
-		@available(*, deprecated, message:"Use `countryCodeV2` instead.")
+		@available(*, deprecated, message: "Use `countryCodeV2` instead.")
 		@discardableResult
 		open func countryCode(alias: String? = nil) -> MailingAddressQuery {
 			addField(field: "countryCode", aliasSuffix: alias)
@@ -171,7 +171,7 @@ extension Storefront {
 			return self
 		}
 
-		/// The two-letter code for the region. For example, ON. 
+		/// The alphanumeric code for the region. For example, ON. 
 		@discardableResult
 		open func provinceCode(alias: String? = nil) -> MailingAddressQuery {
 			addField(field: "provinceCode", aliasSuffix: alias)
@@ -377,7 +377,7 @@ extension Storefront {
 		}
 
 		/// The two-letter code for the country of the address. For example, US. 
-		@available(*, deprecated, message:"Use `countryCodeV2` instead.")
+		@available(*, deprecated, message: "Use `countryCodeV2` instead.")
 		open var countryCode: String? {
 			return internalGetCountryCode()
 		}
@@ -490,7 +490,7 @@ extension Storefront {
 			return field(field: "province", aliasSuffix: alias) as! String?
 		}
 
-		/// The two-letter code for the region. For example, ON. 
+		/// The alphanumeric code for the region. For example, ON. 
 		open var provinceCode: String? {
 			return internalGetProvinceCode()
 		}
@@ -508,7 +508,7 @@ extension Storefront {
 			return field(field: "zip", aliasSuffix: alias) as! String?
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			return []
 		}
 	}

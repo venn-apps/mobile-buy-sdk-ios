@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -68,7 +68,7 @@ extension Storefront {
 			fields.append("customerAccessToken:\(GraphQL.quoteString(input: customerAccessToken))")
 
 			switch companyLocationId {
-				case .value(let companyLocationId): 
+				case .value(let companyLocationId):
 				guard let companyLocationId = companyLocationId else {
 					fields.append("companyLocationId:null")
 					break

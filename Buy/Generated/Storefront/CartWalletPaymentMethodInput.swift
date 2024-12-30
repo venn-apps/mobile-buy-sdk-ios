@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -66,7 +66,7 @@ extension Storefront {
 			var fields: [String] = []
 
 			switch applePayWalletContent {
-				case .value(let applePayWalletContent): 
+				case .value(let applePayWalletContent):
 				guard let applePayWalletContent = applePayWalletContent else {
 					fields.append("applePayWalletContent:null")
 					break
@@ -76,7 +76,7 @@ extension Storefront {
 			}
 
 			switch shopPayWalletContent {
-				case .value(let shopPayWalletContent): 
+				case .value(let shopPayWalletContent):
 				guard let shopPayWalletContent = shopPayWalletContent else {
 					fields.append("shopPayWalletContent:null")
 					break

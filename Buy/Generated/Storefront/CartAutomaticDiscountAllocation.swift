@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,13 @@ extension Storefront {
 			return self
 		}
 
+		/// The type of line that the discount is applicable towards. 
+		@discardableResult
+		open func targetType(alias: String? = nil) -> CartAutomaticDiscountAllocationQuery {
+			addField(field: "targetType", aliasSuffix: alias)
+			return self
+		}
+
 		/// The title of the allocated discount. 
 		@discardableResult
 		open func title(alias: String? = nil) -> CartAutomaticDiscountAllocationQuery {
@@ -64,6 +71,12 @@ extension Storefront {
 				}
 				return try MoneyV2(fields: value)
 
+				case "targetType":
+				guard let value = value as? String else {
+					throw SchemaViolationError(type: CartAutomaticDiscountAllocation.self, field: fieldName, value: fieldValue)
+				}
+				return DiscountApplicationTargetType(rawValue: value) ?? .unknownValue
+
 				case "title":
 				guard let value = value as? String else {
 					throw SchemaViolationError(type: CartAutomaticDiscountAllocation.self, field: fieldName, value: fieldValue)
@@ -84,6 +97,15 @@ extension Storefront {
 			return field(field: "discountedAmount", aliasSuffix: alias) as! Storefront.MoneyV2
 		}
 
+		/// The type of line that the discount is applicable towards. 
+		open var targetType: Storefront.DiscountApplicationTargetType {
+			return internalGetTargetType()
+		}
+
+		func internalGetTargetType(alias: String? = nil) -> Storefront.DiscountApplicationTargetType {
+			return field(field: "targetType", aliasSuffix: alias) as! Storefront.DiscountApplicationTargetType
+		}
+
 		/// The title of the allocated discount. 
 		open var title: String {
 			return internalGetTitle()
@@ -93,10 +115,10 @@ extension Storefront {
 			return field(field: "title", aliasSuffix: alias) as! String
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			var response: [GraphQL.AbstractResponse] = []
 			objectMap.keys.forEach {
-				switch($0) {
+				switch $0 {
 					case "discountedAmount":
 					response.append(internalGetDiscountedAmount())
 					response.append(contentsOf: internalGetDiscountedAmount().childResponseObjectMap())

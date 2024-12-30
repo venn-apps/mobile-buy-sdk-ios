@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,8 +36,13 @@ extension Storefront {
 	open class TrackableQuery: GraphQL.AbstractQuery, GraphQLQuery {
 		public typealias Response = Trackable
 
-		/// A URL parameters to be added to a page URL when it is linked from a GraphQL 
-		/// result. This allows for tracking the origin of the traffic. 
+		/// URL parameters to be added to a page URL to track the origin of on-site 
+		/// search traffic for [analytics 
+		/// reporting](https://help.shopify.com/manual/reports-and-analytics/shopify-reports/report-types/default-reports/behaviour-reports). 
+		/// Returns a result when accessed through the 
+		/// [search](https://shopify.dev/docs/api/storefront/current/queries/search) or 
+		/// [predictiveSearch](https://shopify.dev/docs/api/storefront/current/queries/predictiveSearch) 
+		/// queries, otherwise returns null. 
 		@discardableResult
 		open func trackingParameters(alias: String? = nil) -> TrackableQuery {
 			addField(field: "trackingParameters", aliasSuffix: alias)
@@ -134,8 +139,13 @@ extension Storefront {
 			}
 		}
 
-		/// A URL parameters to be added to a page URL when it is linked from a GraphQL 
-		/// result. This allows for tracking the origin of the traffic. 
+		/// URL parameters to be added to a page URL to track the origin of on-site 
+		/// search traffic for [analytics 
+		/// reporting](https://help.shopify.com/manual/reports-and-analytics/shopify-reports/report-types/default-reports/behaviour-reports). 
+		/// Returns a result when accessed through the 
+		/// [search](https://shopify.dev/docs/api/storefront/current/queries/search) or 
+		/// [predictiveSearch](https://shopify.dev/docs/api/storefront/current/queries/predictiveSearch) 
+		/// queries, otherwise returns null. 
 		open var trackingParameters: String? {
 			return internalGetTrackingParameters()
 		}
@@ -144,7 +154,7 @@ extension Storefront {
 			return field(field: "trackingParameters", aliasSuffix: alias) as! String?
 		}
 
-		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse]  {
+		internal override func childResponseObjectMap() -> [GraphQL.AbstractResponse] {
 			return []
 		}
 	}

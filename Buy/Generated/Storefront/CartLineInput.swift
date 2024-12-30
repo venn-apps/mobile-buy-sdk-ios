@@ -3,7 +3,7 @@
 //  Buy
 //
 //  Created by Shopify.
-//  Copyright (c) 2017 Shopify Inc. All rights reserved.
+//  Copyright (c) 2024 Shopify Inc. All rights reserved.
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -78,17 +78,17 @@ extension Storefront {
 			var fields: [String] = []
 
 			switch attributes {
-				case .value(let attributes): 
+				case .value(let attributes):
 				guard let attributes = attributes else {
 					fields.append("attributes:null")
 					break
 				}
-				fields.append("attributes:[\(attributes.map{ "\($0.serialize())" }.joined(separator: ","))]")
+				fields.append("attributes:[\(attributes.map { "\($0.serialize())" }.joined(separator: ","))]")
 				case .undefined: break
 			}
 
 			switch quantity {
-				case .value(let quantity): 
+				case .value(let quantity):
 				guard let quantity = quantity else {
 					fields.append("quantity:null")
 					break
@@ -100,7 +100,7 @@ extension Storefront {
 			fields.append("merchandiseId:\(GraphQL.quoteString(input: "\(merchandiseId.rawValue)"))")
 
 			switch sellingPlanId {
-				case .value(let sellingPlanId): 
+				case .value(let sellingPlanId):
 				guard let sellingPlanId = sellingPlanId else {
 					fields.append("sellingPlanId:null")
 					break
